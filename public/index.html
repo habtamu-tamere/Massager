@@ -492,6 +492,105 @@
         .toast.show {
             opacity: 1;
         }
+        
+        /* Rating stars */
+        .rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            margin: 10px 0;
+        }
+        
+        .rating input {
+            display: none;
+        }
+        
+        .rating label {
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3e%3cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' fill='%23ddd'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+        }
+        
+        .rating input:checked ~ label {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3e%3cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' fill='%23FFD700'/%3e%3c/svg%3e");
+        }
+        
+        .rating label:hover,
+        .rating label:hover ~ label {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3e%3cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' fill='%23FFD700'/%3e%3c/svg%3e");
+        }
+        
+        /* Booking history */
+        .booking-history {
+            margin-top: 2rem;
+        }
+        
+        .booking-item {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .booking-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-confirmed {
+            background-color: #E8F5E9;
+            color: var(--primary-dark);
+        }
+        
+        .status-completed {
+            background-color: #E3F2FD;
+            color: #1976D2;
+        }
+        
+        .status-cancelled {
+            background-color: #FFEBEE;
+            color: #D32F2F;
+        }
+        
+        /* Telebirr payment simulation */
+        .telebirr-payment {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--primary-light);
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .telebirr-logo {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .payment-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .countdown {
+            font-size: 2rem;
+            color: var(--primary-dark);
+            margin: 15px 0;
+        }
     </style>
 </head>
 <body>
@@ -505,8 +604,8 @@
                 <ul>
                     <li><a href="#home">Home</a></li>
                     <li><a href="#massagers">Massagers</a></li>
+                    <li><a href="#bookings">My Bookings</a></li>
                     <li><a href="#how-it-works">How It Works</a></li>
-                    <li><a href="#about">About</a></li>
                 </ul>
             </nav>
             <div class="auth-buttons">
@@ -532,6 +631,13 @@
             </div>
             <div class="pagination" id="pagination">
                 <!-- Pagination will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <section class="container" id="bookings" style="display: none;">
+            <h2 class="section-title">My Bookings</h2>
+            <div class="booking-history" id="bookings-container">
+                <!-- Booking history will be dynamically inserted here -->
             </div>
         </section>
 
@@ -569,8 +675,8 @@
                 <ul>
                     <li><a href="#home">Home</a></li>
                     <li><a href="#massagers">Massagers</a></li>
+                    <li><a href="#bookings">My Bookings</a></li>
                     <li><a href="#how-it-works">How It Works</a></li>
-                    <li><a href="#about">About Us</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -677,15 +783,58 @@
                 </div>
             </div>
             <button id="proceed-to-payment" class="btn btn-primary" style="width: 100%;">Proceed to Payment</button>
-            
-            <div class="share-buttons">
-                <div class="share-button telegram" data-platform="telegram">
-                    Share via Telegram
-                </div>
-                <div class="share-button whatsapp" data-platform="whatsapp">
-                    Share via WhatsApp
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="payment-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Complete Payment with Telebirr</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="telebirr-payment">
+                <div class="telebirr-logo">📱</div>
+                <h3>Telebirr Payment</h3>
+                <div class="payment-amount" id="payment-amount">0 ETB</div>
+                <p>Please complete the payment in your Telebirr app</p>
+                <div class="countdown" id="payment-countdown">10</div>
+                <p>Simulating payment processing...</p>
+            </div>
+            <button id="confirm-payment" class="btn btn-primary" style="width: 100%; margin-top: 20px; display: none;">Payment Successful</button>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div class="modal" id="rating-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Rate Your Experience</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="rating-details">
+                <!-- Rating details will be inserted here -->
+            </div>
+            <div class="form-group">
+                <label>How was your massage with <span id="massager-rating-name"></span>?</label>
+                <div class="rating">
+                    <input type="radio" id="star5" name="rating" value="5" />
+                    <label for="star5"></label>
+                    <input type="radio" id="star4" name="rating" value="4" />
+                    <label for="star4"></label>
+                    <input type="radio" id="star3" name="rating" value="3" />
+                    <label for="star3"></label>
+                    <input type="radio" id="star2" name="rating" value="2" />
+                    <label for="star2"></label>
+                    <input type="radio" id="star1" name="rating" value="1" />
+                    <label for="star1"></label>
                 </div>
             </div>
+            <div class="form-group">
+                <label for="review-comment">Comment (optional)</label>
+                <textarea id="review-comment" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
+            </div>
+            <button id="submit-rating" class="btn btn-primary" style="width: 100%;">Submit Review</button>
         </div>
     </div>
 
@@ -704,14 +853,16 @@
     </div>
 
     <script>
-        // API endpoints (would be replaced with actual endpoints in production)
+        // API endpoints
         const API_BASE = 'https://your-render-app.onrender.com/api';
         const ENDPOINTS = {
             LOGIN: `${API_BASE}/auth/login`,
             REGISTER: `${API_BASE}/auth/register`,
             MASSAGERS: `${API_BASE}/massagers`,
             BOOKINGS: `${API_BASE}/bookings`,
-            TELEGRAM: `${API_BASE}/telegram`
+            TELEGRAM: `${API_BASE}/telegram`,
+            NOTIFICATIONS: `${API_BASE}/notifications`,
+            RATINGS: `${API_BASE}/ratings`
         };
 
         // Sample data for massagers (fallback if API is not available)
@@ -720,10 +871,11 @@
             sampleMassagers.push({
                 id: i,
                 name: `Massager ${i}`,
-                specialty: ['Swedish', 'Deep Tissue', 'Aromatherapy', 'Hot Stone'][Math.floor(Math.random() * 4)],
+                specialty: ['Swedish', 'Deep Tissue', 'Aromatherapy', 'Hot Stone', 'Thai', 'Shiatsu'][Math.floor(Math.random() * 6)],
                 rating: (Math.random() * 2 + 3).toFixed(1), // Random rating between 3.0 and 5.0
                 price: Math.floor(Math.random() * 1000) + 500, // Random price between 500 and 1500
-                image: `💆‍${i % 2 ? '♂' : '♀'}️` // Alternate between male and female emoji
+                image: `💆‍${i % 2 ? '♂' : '♀'}️`, // Alternate between male and female emoji
+                reviews: Math.floor(Math.random() * 100)
             });
         }
 
@@ -732,14 +884,19 @@
         const itemsPerPage = 10;
         let loggedInUser = null;
         let selectedMassager = null;
+        let currentBooking = null;
         let deferredPrompt = null;
 
         // DOM elements
         const massagersContainer = document.getElementById('massagers-container');
+        const bookingsContainer = document.getElementById('bookings-container');
+        const bookingsSection = document.getElementById('bookings');
         const paginationElement = document.getElementById('pagination');
         const loginModal = document.getElementById('login-modal');
         const registerModal = document.getElementById('register-modal');
         const bookingModal = document.getElementById('booking-modal');
+        const paymentModal = document.getElementById('payment-modal');
+        const ratingModal = document.getElementById('rating-modal');
         const profileModal = document.getElementById('profile-modal');
         const loginBtn = document.getElementById('login-btn');
         const registerBtn = document.getElementById('register-btn');
@@ -749,6 +906,8 @@
         const switchToRegister = document.getElementById('switch-to-register');
         const switchToLogin = document.getElementById('switch-to-login');
         const proceedToPaymentBtn = document.getElementById('proceed-to-payment');
+        const confirmPaymentBtn = document.getElementById('confirm-payment');
+        const submitRatingBtn = document.getElementById('submit-rating');
         const toast = document.getElementById('toast');
 
         // Initialize the app
@@ -803,7 +962,7 @@
                     <div class="massager-info">
                         <h3 class="massager-name">${massager.name}</h3>
                         <div class="massager-specialty">Specialty: ${massager.specialty}</div>
-                        <div class="massager-rating">Rating: ${massager.rating} ⭐</div>
+                        <div class="massager-rating">Rating: ${massager.rating} ⭐ (${massager.reviews} reviews)</div>
                         <div class="massager-price">Price: ${massager.price} ETB/hr</div>
                     </div>
                     <div class="card-actions">
@@ -931,6 +1090,8 @@
                     loginModal.style.display = 'none';
                     registerModal.style.display = 'none';
                     bookingModal.style.display = 'none';
+                    paymentModal.style.display = 'none';
+                    ratingModal.style.display = 'none';
                     profileModal.style.display = 'none';
                 });
             });
@@ -952,15 +1113,10 @@
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('register-form').addEventListener('submit', handleRegister);
             
-            // Payment and sharing
-            proceedToPaymentBtn.addEventListener('click', handlePayment);
-            
-            document.querySelectorAll('.share-button').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const platform = this.getAttribute('data-platform');
-                    shareBooking(platform);
-                });
-            });
+            // Payment and booking
+            proceedToPaymentBtn.addEventListener('click', handleProceedToPayment);
+            confirmPaymentBtn.addEventListener('click', handlePaymentCompletion);
+            submitRatingBtn.addEventListener('click', handleRatingSubmission);
             
             // Logout
             logoutBtn.addEventListener('click', handleLogout);
@@ -993,6 +1149,7 @@
                 try {
                     loggedInUser = JSON.parse(userData);
                     updateAuthUI();
+                    loadUserBookings();
                 } catch (e) {
                     console.error('Error parsing user data:', e);
                     localStorage.removeItem('dimple_user');
@@ -1005,6 +1162,7 @@
             if (loggedInUser) {
                 loginBtn.textContent = 'Profile';
                 registerBtn.style.display = 'none';
+                bookingsSection.style.display = 'block';
                 
                 // Remove previous event listeners
                 loginBtn.replaceWith(loginBtn.cloneNode(true));
@@ -1030,6 +1188,7 @@
             } else {
                 loginBtn.textContent = 'Login';
                 registerBtn.style.display = 'block';
+                bookingsSection.style.display = 'none';
                 
                 // Remove previous event listeners
                 loginBtn.replaceWith(loginBtn.cloneNode(true));
@@ -1065,6 +1224,7 @@
                     localStorage.setItem('dimple_user', JSON.stringify(user));
                     loginModal.style.display = 'none';
                     updateAuthUI();
+                    loadUserBookings();
                     showToast('Login successful!');
                 } else {
                     // Fallback to local storage check
@@ -1076,6 +1236,7 @@
                         localStorage.setItem('dimple_user', JSON.stringify(user));
                         loginModal.style.display = 'none';
                         updateAuthUI();
+                        loadUserBookings();
                         showToast('Login successful!');
                     } else {
                         showToast('Invalid credentials. Please try again.', 'error');
@@ -1092,6 +1253,7 @@
                     localStorage.setItem('dimple_user', JSON.stringify(user));
                     loginModal.style.display = 'none';
                     updateAuthUI();
+                    loadUserBookings();
                     showToast('Login successful!');
                 } else {
                     showToast('Invalid credentials. Please try again.', 'error');
@@ -1170,8 +1332,8 @@
             }
         }
 
-        // Handle payment
-        async function handlePayment() {
+        // Handle proceed to payment
+        function handleProceedToPayment() {
             if (!loggedInUser) {
                 showToast('Please login to book a massage', 'error');
                 loginModal.style.display = 'flex';
@@ -1186,13 +1348,47 @@
                 return;
             }
             
+            // Create booking object
+            currentBooking = {
+                massagerId: selectedMassager.id,
+                massagerName: selectedMassager.name,
+                date,
+                time,
+                price: selectedMassager.price,
+                userId: loggedInUser.id || loggedInUser.email,
+                userName: loggedInUser.name
+            };
+            
+            // Show payment modal
+            document.getElementById('payment-amount').textContent = `${selectedMassager.price} ETB`;
+            bookingModal.style.display = 'none';
+            paymentModal.style.display = 'flex';
+            
+            // Simulate payment process
+            let countdown = 10;
+            const countdownElement = document.getElementById('payment-countdown');
+            countdownElement.textContent = countdown;
+            
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    confirmPaymentBtn.style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        // Handle payment completion
+        async function handlePaymentCompletion() {
             try {
                 // Create booking
                 const bookingData = {
                     massagerId: selectedMassager.id,
                     massagerName: selectedMassager.name,
-                    date,
-                    time,
+                    date: currentBooking.date,
+                    time: currentBooking.time,
                     price: selectedMassager.price,
                     userId: loggedInUser.id || loggedInUser.email,
                     userName: loggedInUser.name
@@ -1208,17 +1404,19 @@
                 });
                 
                 if (response.ok) {
-                    // Simulate Telebirr payment process
-                    showToast(`Redirecting to Telebirr payment for ${selectedMassager.price} ETB...`);
+                    const booking = await response.json();
                     
-                    // In a real app, this would redirect to Telebirr payment gateway
-                    setTimeout(() => {
-                        bookingModal.style.display = 'none';
-                        showToast('Payment successful! Your booking is confirmed.');
-                        
-                        // Share to Telegram channel
-                        shareToTelegram(bookingData);
-                    }, 2000);
+                    // Send notification to massager
+                    await notifyMassager(booking);
+                    
+                    // Send to Telegram channel
+                    await shareToTelegram(booking);
+                    
+                    paymentModal.style.display = 'none';
+                    showToast('Payment successful! Your booking is confirmed.');
+                    
+                    // Reload bookings
+                    loadUserBookings();
                 } else {
                     throw new Error('API not available');
                 }
@@ -1230,51 +1428,226 @@
                     id: Date.now(),
                     massagerId: selectedMassager.id,
                     massagerName: selectedMassager.name,
-                    date,
-                    time,
+                    date: new Date(currentBooking.date),
+                    time: currentBooking.time,
                     price: selectedMassager.price,
                     userId: loggedInUser.id || loggedInUser.email,
                     userName: loggedInUser.name,
-                    status: 'confirmed'
+                    status: 'confirmed',
+                    createdAt: new Date()
                 };
                 
                 bookings.push(bookingData);
                 localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
                 
-                // Simulate Telebirr payment process
-                showToast(`Redirecting to Telebirr payment for ${selectedMassager.price} ETB...`);
+                // Send notification to massager
+                await notifyMassager(bookingData);
                 
-                setTimeout(() => {
-                    bookingModal.style.display = 'none';
-                    showToast('Payment successful! Your booking is confirmed.');
-                    
-                    // Share to Telegram channel
-                    shareToTelegram(bookingData);
-                }, 2000);
+                // Send to Telegram channel
+                await shareToTelegram(bookingData);
+                
+                paymentModal.style.display = 'none';
+                showToast('Payment successful! Your booking is confirmed.');
+                
+                // Reload bookings
+                loadUserBookings();
             }
         }
 
-        // Share booking
-        function shareBooking(platform) {
-            const message = `I just booked a massage session with ${selectedMassager.name} on Dimple!`;
-            let url = '';
+        // Handle rating submission
+        async function handleRatingSubmission() {
+            const rating = document.querySelector('input[name="rating"]:checked');
+            const comment = document.getElementById('review-comment').value;
             
-            switch(platform) {
-                case 'telegram':
-                    url = `https://t.me/share/url?url=https://dimple.com&text=${encodeURIComponent(message)}`;
-                    break;
-                case 'whatsapp':
-                    url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-                    break;
+            if (!rating) {
+                showToast('Please select a rating', 'error');
+                return;
             }
             
-            window.open(url, '_blank');
+            try {
+                // Submit rating via API
+                const response = await fetch(ENDPOINTS.RATINGS, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        massagerId: currentBooking.massagerId,
+                        bookingId: currentBooking.id,
+                        rating: rating.value,
+                        comment
+                    })
+                });
+                
+                if (response.ok) {
+                    ratingModal.style.display = 'none';
+                    showToast('Thank you for your feedback!');
+                    
+                    // Update massager rating in UI
+                    const massager = sampleMassagers.find(m => m.id === currentBooking.massagerId);
+                    if (massager) {
+                        // Simple average calculation for demo
+                        const newReviews = massager.reviews + 1;
+                        const newRating = ((massager.rating * massager.reviews) + parseInt(rating.value)) / newReviews;
+                        massager.rating = newRating.toFixed(1);
+                        massager.reviews = newReviews;
+                        
+                        // Re-render massagers
+                        renderMassagers();
+                    }
+                } else {
+                    throw new Error('API not available');
+                }
+            } catch (error) {
+                console.error('Rating error:', error);
+                // Fallback to local storage
+                const ratings = JSON.parse(localStorage.getItem('dimple_ratings') || '[]');
+                ratings.push({
+                    massagerId: currentBooking.massagerId,
+                    bookingId: currentBooking.id,
+                    rating: rating.value,
+                    comment,
+                    createdAt: new Date()
+                });
+                
+                localStorage.setItem('dimple_ratings', JSON.stringify(ratings));
+                
+                ratingModal.style.display = 'none';
+                showToast('Thank you for your feedback!');
+                
+                // Update massager rating in UI
+                const massager = sampleMassagers.find(m => m.id === currentBooking.massagerId);
+                if (massager) {
+                    // Simple average calculation for demo
+                    const newReviews = massager.reviews + 1;
+                    const newRating = ((massager.rating * massager.reviews) + parseInt(rating.value)) / newReviews;
+                    massager.rating = newRating.toFixed(1);
+                    massager.reviews = newReviews;
+                    
+                    // Re-render massagers
+                    renderMassagers();
+                }
+            }
+        }
+
+        // Load user bookings
+        async function loadUserBookings() {
+            if (!loggedInUser) return;
+            
+            try {
+                // Try to fetch from API
+                const response = await fetch(`${ENDPOINTS.BOOKINGS}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('dimple_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayBookings(data.bookings);
+                } else {
+                    throw new Error('API not available');
+                }
+            } catch (error) {
+                // Fallback to local storage
+                const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
+                const userBookings = bookings.filter(b => b.userId === (loggedInUser.id || loggedInUser.email));
+                displayBookings(userBookings);
+            }
+        }
+
+        // Display bookings
+        function displayBookings(bookings) {
+            bookingsContainer.innerHTML = '';
+            
+            if (bookings.length === 0) {
+                bookingsContainer.innerHTML = '<p style="text-align: center;">You have no bookings yet.</p>';
+                return;
+            }
+            
+            // Sort bookings by date (newest first)
+            bookings.sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+            
+            bookings.forEach(booking => {
+                const bookingDate = new Date(booking.date || booking.createdAt);
+                const isPastBooking = bookingDate < new Date();
+                const canRate = isPastBooking && booking.status === 'confirmed' && !booking.rated;
+                
+                const bookingItem = document.createElement('div');
+                bookingItem.className = 'booking-item';
+                bookingItem.innerHTML = `
+                    <div class="booking-header">
+                        <h3>${booking.massagerName}</h3>
+                        <span class="booking-status status-${booking.status}">${booking.status}</span>
+                    </div>
+                    <p>Date: ${bookingDate.toDateString()}</p>
+                    <p>Time: ${booking.time}</p>
+                    <p>Price: ${booking.price} ETB</p>
+                    ${canRate ? `<button class="btn btn-primary rate-booking" data-id="${booking.id}">Rate Experience</button>` : ''}
+                `;
+                
+                bookingsContainer.appendChild(bookingItem);
+            });
+            
+            // Add event listeners to rate buttons
+            document.querySelectorAll('.rate-booking').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const bookingId = this.getAttribute('data-id');
+                    openRatingModal(bookingId);
+                });
+            });
+        }
+
+        // Open rating modal
+        function openRatingModal(bookingId) {
+            // Find booking
+            const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
+            const booking = bookings.find(b => b.id == bookingId);
+            
+            if (!booking) {
+                showToast('Booking not found', 'error');
+                return;
+            }
+            
+            currentBooking = booking;
+            
+            // Set massager name
+            document.getElementById('massager-rating-name').textContent = booking.massagerName;
+            
+            // Clear previous rating
+            document.querySelectorAll('input[name="rating"]').forEach(input => {
+                input.checked = false;
+            });
+            document.getElementById('review-comment').value = '';
+            
+            ratingModal.style.display = 'flex';
+        }
+
+        // Notify massager
+        async function notifyMassager(booking) {
+            try {
+                // Send notification via API
+                await fetch(ENDPOINTS.NOTIFICATIONS, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        massagerId: booking.massagerId,
+                        message: `New booking: ${booking.userName} on ${new Date(booking.date).toDateString()} at ${booking.time}`
+                    })
+                });
+            } catch (error) {
+                console.error('Notification error:', error);
+                // Simulate notification in console
+                console.log(`Notification to massager ${booking.massagerId}: ${booking.userName} booked a session on ${new Date(booking.date).toDateString()} at ${booking.time}`);
+            }
         }
 
         // Share to Telegram channel
-        async function shareToTelegram(bookingData) {
+        async function shareToTelegram(booking) {
             try {
-                const message = `New booking: ${bookingData.userName} booked ${bookingData.massagerName} on ${bookingData.date} at ${bookingData.time} for ${bookingData.price} ETB`;
+                const message = `New booking: ${booking.userName} booked ${booking.massagerName} on ${new Date(booking.date).toDateString()} at ${booking.time} for ${booking.price} ETB`;
                 
                 // Try to send to Telegram via API
                 await fetch(ENDPOINTS.TELEGRAM, {
@@ -1287,7 +1660,7 @@
             } catch (error) {
                 console.error('Telegram sharing error:', error);
                 // In a real implementation, this would use the Telegram Bot API
-                console.log(`Sharing booking to Telegram channel @lelaworker: ${bookingData.userName} booked ${bookingData.massagerName}`);
+                console.log(`Sharing booking to Telegram channel @lelaworker: ${booking.userName} booked ${booking.massagerName}`);
             }
         }
 
@@ -1295,6 +1668,7 @@
         function handleLogout() {
             loggedInUser = null;
             localStorage.removeItem('dimple_user');
+            localStorage.removeItem('dimple_token');
             profileModal.style.display = 'none';
             updateAuthUI();
             showToast('You have been logged out');

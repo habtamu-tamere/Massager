@@ -493,12 +493,34 @@
             opacity: 1;
         }
         
+        /* Role selection */
+        .role-selection {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .role-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .role-option.selected {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
         /* Rating stars */
         .rating {
             display: flex;
             flex-direction: row-reverse;
             justify-content: flex-end;
-            margin: 10px 0;
+            margin: 1rem 0;
         }
         
         .rating input {
@@ -509,24 +531,23 @@
             cursor: pointer;
             width: 30px;
             height: 30px;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3e%3cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' fill='%23ddd'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-        }
-        
-        .rating input:checked ~ label {
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3e%3cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' fill='%23FFD700'/%3e%3c/svg%3e");
+            background: #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 1.5rem;
         }
         
         .rating label:hover,
-        .rating label:hover ~ label {
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3e%3cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' fill='%23FFD700'/%3e%3c/svg%3e");
+        .rating label:hover ~ label,
+        .rating input:checked ~ label {
+            background: #FF9800;
         }
         
         /* Booking history */
         .booking-history {
-            margin-top: 2rem;
+            margin: 2rem 0;
         }
         
         .booking-item {
@@ -537,18 +558,12 @@
             box-shadow: var(--shadow);
         }
         
-        .booking-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        
         .booking-status {
+            display: inline-block;
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.8rem;
-            font-weight: bold;
+            margin-bottom: 0.5rem;
         }
         
         .status-confirmed {
@@ -564,32 +579,6 @@
         .status-cancelled {
             background-color: #FFEBEE;
             color: #D32F2F;
-        }
-        
-        /* Telebirr payment simulation */
-        .telebirr-payment {
-            text-align: center;
-            padding: 20px;
-            background-color: var(--primary-light);
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        
-        .telebirr-logo {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-        
-        .payment-amount {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        
-        .countdown {
-            font-size: 2rem;
-            color: var(--primary-dark);
-            margin: 15px 0;
         }
     </style>
 </head>
@@ -611,6 +600,7 @@
             <div class="auth-buttons">
                 <button class="btn btn-outline" id="login-btn">Login</button>
                 <button class="btn btn-primary" id="register-btn">Register</button>
+                <button class="btn btn-outline" id="logout-btn" style="display: none;">Logout</button>
             </div>
         </div>
     </header>
@@ -727,7 +717,18 @@
                 <h2>Create Account</h2>
                 <button class="close-modal">&times;</button>
             </div>
+            <div class="role-selection">
+                <div class="role-option selected" data-role="user">
+                    <h3>User</h3>
+                    <p>I want to book massages</p>
+                </div>
+                <div class="role-option" data-role="massager">
+                    <h3>Massager</h3>
+                    <p>I provide massage services</p>
+                </div>
+            </div>
             <form id="register-form">
+                <input type="hidden" id="register-role" value="user">
                 <div class="form-group">
                     <label for="register-name">Full Name</label>
                     <input type="text" id="register-name" class="form-control" required>
@@ -739,6 +740,23 @@
                 <div class="form-group">
                     <label for="register-phone">Phone Number</label>
                     <input type="tel" id="register-phone" class="form-control" required>
+                </div>
+                <div id="massager-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="register-specialty">Specialty</label>
+                        <select id="register-specialty" class="form-control">
+                            <option value="Swedish">Swedish Massage</option>
+                            <option value="Deep Tissue">Deep Tissue Massage</option>
+                            <option value="Aromatherapy">Aromatherapy Massage</option>
+                            <option value="Hot Stone">Hot Stone Massage</option>
+                            <option value="Thai">Thai Massage</option>
+                            <option value="Shiatsu">Shiatsu Massage</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-hourly-rate">Hourly Rate (ETB)</label>
+                        <input type="number" id="register-hourly-rate" class="form-control" min="500" value="1000">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="register-password">Password</label>
@@ -783,6 +801,15 @@
                 </div>
             </div>
             <button id="proceed-to-payment" class="btn btn-primary" style="width: 100%;">Proceed to Payment</button>
+            
+            <div class="share-buttons">
+                <div class="share-button telegram" data-platform="telegram">
+                    Share via Telegram
+                </div>
+                <div class="share-button whatsapp" data-platform="whatsapp">
+                    Share via WhatsApp
+                </div>
+            </div>
         </div>
     </div>
 
@@ -793,15 +820,18 @@
                 <h2>Complete Payment with Telebirr</h2>
                 <button class="close-modal">&times;</button>
             </div>
-            <div class="telebirr-payment">
-                <div class="telebirr-logo">📱</div>
-                <h3>Telebirr Payment</h3>
-                <div class="payment-amount" id="payment-amount">0 ETB</div>
-                <p>Please complete the payment in your Telebirr app</p>
-                <div class="countdown" id="payment-countdown">10</div>
-                <p>Simulating payment processing...</p>
+            <div id="payment-details">
+                <!-- Payment details will be inserted here -->
             </div>
-            <button id="confirm-payment" class="btn btn-primary" style="width: 100%; margin-top: 20px; display: none;">Payment Successful</button>
+            <div class="form-group">
+                <label for="telebirr-phone">Telebirr Phone Number</label>
+                <input type="tel" id="telebirr-phone" class="form-control" placeholder="Enter your Telebirr phone number" required>
+            </div>
+            <div class="form-group">
+                <label for="telebirr-pin">Telebirr PIN</label>
+                <input type="password" id="telebirr-pin" class="form-control" placeholder="Enter your Telebirr PIN" required>
+            </div>
+            <button id="confirm-payment" class="btn btn-primary" style="width: 100%;">Confirm Payment</button>
         </div>
     </div>
 
@@ -816,25 +846,25 @@
                 <!-- Rating details will be inserted here -->
             </div>
             <div class="form-group">
-                <label>How was your massage with <span id="massager-rating-name"></span>?</label>
+                <label>Your Rating</label>
                 <div class="rating">
                     <input type="radio" id="star5" name="rating" value="5" />
-                    <label for="star5"></label>
+                    <label for="star5">★</label>
                     <input type="radio" id="star4" name="rating" value="4" />
-                    <label for="star4"></label>
+                    <label for="star4">★</label>
                     <input type="radio" id="star3" name="rating" value="3" />
-                    <label for="star3"></label>
+                    <label for="star3">★</label>
                     <input type="radio" id="star2" name="rating" value="2" />
-                    <label for="star2"></label>
+                    <label for="star2">★</label>
                     <input type="radio" id="star1" name="rating" value="1" />
-                    <label for="star1"></label>
+                    <label for="star1">★</label>
                 </div>
             </div>
             <div class="form-group">
-                <label for="review-comment">Comment (optional)</label>
+                <label for="review-comment">Your Review (Optional)</label>
                 <textarea id="review-comment" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
             </div>
-            <button id="submit-rating" class="btn btn-primary" style="width: 100%;">Submit Review</button>
+            <button id="submit-rating" class="btn btn-primary" style="width: 100%;">Submit Rating</button>
         </div>
     </div>
 
@@ -848,7 +878,7 @@
             <div id="profile-info">
                 <!-- Profile information will be inserted here -->
             </div>
-            <button id="logout-btn" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">Logout</button>
+            <button id="profile-logout-btn" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">Logout</button>
         </div>
     </div>
 
@@ -862,7 +892,8 @@
             BOOKINGS: `${API_BASE}/bookings`,
             TELEGRAM: `${API_BASE}/telegram`,
             NOTIFICATIONS: `${API_BASE}/notifications`,
-            RATINGS: `${API_BASE}/ratings`
+            RATINGS: `${API_BASE}/ratings`,
+            LOGOUT: `${API_BASE}/auth/logout`
         };
 
         // Sample data for massagers (fallback if API is not available)
@@ -874,8 +905,7 @@
                 specialty: ['Swedish', 'Deep Tissue', 'Aromatherapy', 'Hot Stone', 'Thai', 'Shiatsu'][Math.floor(Math.random() * 6)],
                 rating: (Math.random() * 2 + 3).toFixed(1), // Random rating between 3.0 and 5.0
                 price: Math.floor(Math.random() * 1000) + 500, // Random price between 500 and 1500
-                image: `💆‍${i % 2 ? '♂' : '♀'}️`, // Alternate between male and female emoji
-                reviews: Math.floor(Math.random() * 100)
+                image: `💆‍${i % 2 ? '♂' : '♀'}️` // Alternate between male and female emoji
             });
         }
 
@@ -884,7 +914,7 @@
         const itemsPerPage = 10;
         let loggedInUser = null;
         let selectedMassager = null;
-        let currentBooking = null;
+        let selectedBooking = null;
         let deferredPrompt = null;
 
         // DOM elements
@@ -900,15 +930,19 @@
         const profileModal = document.getElementById('profile-modal');
         const loginBtn = document.getElementById('login-btn');
         const registerBtn = document.getElementById('register-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const profileLogoutBtn = document.getElementById('profile-logout-btn');
         const bookNowBtn = document.getElementById('book-now-btn');
         const installBtn = document.getElementById('install-btn');
-        const logoutBtn = document.getElementById('logout-btn');
         const switchToRegister = document.getElementById('switch-to-register');
         const switchToLogin = document.getElementById('switch-to-login');
         const proceedToPaymentBtn = document.getElementById('proceed-to-payment');
         const confirmPaymentBtn = document.getElementById('confirm-payment');
         const submitRatingBtn = document.getElementById('submit-rating');
         const toast = document.getElementById('toast');
+        const roleOptions = document.querySelectorAll('.role-option');
+        const massagerFields = document.getElementById('massager-fields');
+        const registerRole = document.getElementById('register-role');
 
         // Initialize the app
         function init() {
@@ -962,7 +996,7 @@
                     <div class="massager-info">
                         <h3 class="massager-name">${massager.name}</h3>
                         <div class="massager-specialty">Specialty: ${massager.specialty}</div>
-                        <div class="massager-rating">Rating: ${massager.rating} ⭐ (${massager.reviews} reviews)</div>
+                        <div class="massager-rating">Rating: ${massager.rating} ⭐ (${massager.reviewCount || Math.floor(Math.random() * 50) + 1} reviews)</div>
                         <div class="massager-price">Price: ${massager.price} ETB/hr</div>
                     </div>
                     <div class="card-actions">
@@ -1031,6 +1065,92 @@
             }
         }
 
+        // Load user's bookings
+        async function loadUserBookings() {
+            if (!loggedInUser) return;
+            
+            try {
+                const token = localStorage.getItem('dimple_token');
+                const response = await fetch(ENDPOINTS.BOOKINGS, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayBookings(data.data || data.bookings || []);
+                } else {
+                    // Fallback to local storage
+                    const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
+                    const userBookings = bookings.filter(b => b.userId === loggedInUser.id || b.userId === loggedInUser.email);
+                    displayBookings(userBookings);
+                }
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                // Fallback to local storage
+                const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
+                const userBookings = bookings.filter(b => b.userId === loggedInUser.id || b.userId === loggedInUser.email);
+                displayBookings(userBookings);
+            }
+        }
+
+        // Display user's bookings
+        function displayBookings(bookings) {
+            bookingsContainer.innerHTML = '';
+            
+            if (bookings.length === 0) {
+                bookingsContainer.innerHTML = '<p style="text-align: center;">You have no bookings yet.</p>';
+                return;
+            }
+            
+            bookings.forEach(booking => {
+                const bookingItem = document.createElement('div');
+                bookingItem.className = 'booking-item';
+                
+                const statusClass = `status-${booking.status || 'confirmed'}`;
+                
+                bookingItem.innerHTML = `
+                    <div class="booking-status ${statusClass}">${booking.status || 'confirmed'}</div>
+                    <h3>${booking.massagerName || 'Massager'}</h3>
+                    <p>Date: ${new Date(booking.date).toDateString()}</p>
+                    <p>Time: ${booking.time}</p>
+                    <p>Price: ${booking.price} ETB</p>
+                    ${booking.status === 'completed' ? 
+                        `<p>Rating: ${booking.rating ? `${booking.rating} ⭐` : 'Not rated yet'}</p>` : 
+                        ''
+                    }
+                    <div class="card-actions">
+                        ${booking.status === 'completed' && !booking.rating ? 
+                            `<button class="btn btn-primary rate-btn" data-id="${booking.id}">Rate Now</button>` : 
+                            ''
+                        }
+                        ${booking.status === 'confirmed' ? 
+                            `<button class="btn btn-outline cancel-btn" data-id="${booking.id}">Cancel Booking</button>` : 
+                            ''
+                        }
+                    </div>
+                `;
+                
+                bookingsContainer.appendChild(bookingItem);
+            });
+            
+            // Add event listeners to the buttons
+            document.querySelectorAll('.rate-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const bookingId = this.getAttribute('data-id');
+                    openRatingModal(bookingId);
+                });
+            });
+            
+            document.querySelectorAll('.cancel-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const bookingId = this.getAttribute('data-id');
+                    cancelBooking(bookingId);
+                });
+            });
+        }
+
         // Open booking modal
         function openBookingModal(massagerId) {
             // Try to find in sample data first
@@ -1060,11 +1180,44 @@
             bookingModal.style.display = 'flex';
         }
 
+        // Open rating modal
+        function openRatingModal(bookingId) {
+            const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
+            selectedBooking = bookings.find(b => b.id == bookingId);
+            
+            if (!selectedBooking) {
+                showToast('Booking not found', 'error');
+                return;
+            }
+            
+            const ratingDetails = document.getElementById('rating-details');
+            ratingDetails.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    <div style="font-size: 3rem; margin-right: 15px;">${selectedBooking.massagerImage || '💆'}</div>
+                    <div>
+                        <h3>${selectedBooking.massagerName || 'Massager'}</h3>
+                        <p>Date: ${new Date(selectedBooking.date).toDateString()}</p>
+                        <p>Time: ${selectedBooking.time}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Reset rating stars
+            document.querySelectorAll('.rating input').forEach(input => {
+                input.checked = false;
+            });
+            
+            ratingModal.style.display = 'flex';
+        }
+
         // Setup event listeners
         function setupEventListeners() {
             // Auth buttons
             loginBtn.addEventListener('click', () => loginModal.style.display = 'flex');
             registerBtn.addEventListener('click', () => registerModal.style.display = 'flex');
+            logoutBtn.addEventListener('click', handleLogout);
+            profileLogoutBtn.addEventListener('click', handleLogout);
+            
             bookNowBtn.addEventListener('click', () => {
                 if (loggedInUser) {
                     // If logged in, scroll to massagers section
@@ -1073,6 +1226,21 @@
                     // If not logged in, open login modal
                     loginModal.style.display = 'flex';
                 }
+            });
+            
+            // Role selection
+            roleOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    roleOptions.forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    registerRole.value = this.getAttribute('data-role');
+                    
+                    if (registerRole.value === 'massager') {
+                        massagerFields.style.display = 'block';
+                    } else {
+                        massagerFields.style.display = 'none';
+                    }
+                });
             });
             
             // Close modals when clicking outside
@@ -1113,13 +1281,33 @@
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('register-form').addEventListener('submit', handleRegister);
             
-            // Payment and booking
-            proceedToPaymentBtn.addEventListener('click', handleProceedToPayment);
-            confirmPaymentBtn.addEventListener('click', handlePaymentCompletion);
-            submitRatingBtn.addEventListener('click', handleRatingSubmission);
+            // Payment and sharing
+            proceedToPaymentBtn.addEventListener('click', handlePayment);
+            confirmPaymentBtn.addEventListener('click', confirmPayment);
+            submitRatingBtn.addEventListener('click', submitRating);
             
-            // Logout
-            logoutBtn.addEventListener('click', handleLogout);
+            document.querySelectorAll('.share-button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const platform = this.getAttribute('data-platform');
+                    shareBooking(platform);
+                });
+            });
+            
+            // Navigation
+            document.querySelector('a[href="#bookings"]').addEventListener('click', (e) => {
+                if (loggedInUser) {
+                    e.preventDefault();
+                    document.getElementById('massagers').style.display = 'none';
+                    bookingsSection.style.display = 'block';
+                    loadUserBookings();
+                }
+            });
+            
+            document.querySelector('a[href="#massagers"]').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('massagers').style.display = 'block';
+                bookingsSection.style.display = 'none';
+            });
             
             // PWA installation
             window.addEventListener('beforeinstallprompt', (e) => {
@@ -1145,14 +1333,16 @@
         // Check authentication status
         function checkAuthStatus() {
             const userData = localStorage.getItem('dimple_user');
-            if (userData) {
+            const token = localStorage.getItem('dimple_token');
+            
+            if (userData && token) {
                 try {
                     loggedInUser = JSON.parse(userData);
                     updateAuthUI();
-                    loadUserBookings();
                 } catch (e) {
                     console.error('Error parsing user data:', e);
                     localStorage.removeItem('dimple_user');
+                    localStorage.removeItem('dimple_token');
                 }
             }
         }
@@ -1160,14 +1350,13 @@
         // Update UI based on authentication status
         function updateAuthUI() {
             if (loggedInUser) {
-                loginBtn.textContent = 'Profile';
+                loginBtn.style.display = 'none';
                 registerBtn.style.display = 'none';
-                bookingsSection.style.display = 'block';
+                logoutBtn.style.display = 'block';
                 
-                // Remove previous event listeners
-                loginBtn.replaceWith(loginBtn.cloneNode(true));
-                const newLoginBtn = document.getElementById('login-btn');
-                newLoginBtn.addEventListener('click', () => {
+                // Update login button to show profile
+                loginBtn.textContent = 'Profile';
+                loginBtn.addEventListener('click', () => {
                     // Show profile instead of login
                     document.getElementById('profile-info').innerHTML = `
                         <div class="form-group">
@@ -1182,17 +1371,20 @@
                             <label>Phone</label>
                             <div>${loggedInUser.phone}</div>
                         </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <div>${loggedInUser.role || 'user'}</div>
+                        </div>
                     `;
                     profileModal.style.display = 'flex';
                 });
             } else {
-                loginBtn.textContent = 'Login';
+                loginBtn.style.display = 'block';
                 registerBtn.style.display = 'block';
-                bookingsSection.style.display = 'none';
+                logoutBtn.style.display = 'none';
                 
-                // Remove previous event listeners
-                loginBtn.replaceWith(loginBtn.cloneNode(true));
-                document.getElementById('login-btn').addEventListener('click', () => loginModal.style.display = 'flex');
+                loginBtn.textContent = 'Login';
+                loginBtn.addEventListener('click', () => loginModal.style.display = 'flex');
             }
         }
 
@@ -1219,12 +1411,12 @@
                 });
                 
                 if (response.ok) {
-                    const user = await response.json();
-                    loggedInUser = user;
-                    localStorage.setItem('dimple_user', JSON.stringify(user));
+                    const data = await response.json();
+                    loggedInUser = data.data.user;
+                    localStorage.setItem('dimple_user', JSON.stringify(loggedInUser));
+                    localStorage.setItem('dimple_token', data.token);
                     loginModal.style.display = 'none';
                     updateAuthUI();
-                    loadUserBookings();
                     showToast('Login successful!');
                 } else {
                     // Fallback to local storage check
@@ -1236,10 +1428,9 @@
                         localStorage.setItem('dimple_user', JSON.stringify(user));
                         loginModal.style.display = 'none';
                         updateAuthUI();
-                        loadUserBookings();
                         showToast('Login successful!');
                     } else {
-                        showToast('Invalid credentials. Please try again.', 'error');
+                        showToast('Incorrect email or password', 'error');
                     }
                 }
             } catch (error) {
@@ -1253,10 +1444,9 @@
                     localStorage.setItem('dimple_user', JSON.stringify(user));
                     loginModal.style.display = 'none';
                     updateAuthUI();
-                    loadUserBookings();
                     showToast('Login successful!');
                 } else {
-                    showToast('Invalid credentials. Please try again.', 'error');
+                    showToast('Incorrect email or password', 'error');
                 }
             }
         }
@@ -1269,6 +1459,7 @@
             const phone = document.getElementById('register-phone').value;
             const password = document.getElementById('register-password').value;
             const confirmPassword = document.getElementById('register-confirm-password').value;
+            const role = registerRole.value;
             
             // Validation
             if (password !== confirmPassword) {
@@ -1277,19 +1468,34 @@
             }
             
             try {
+                const userData = {
+                    name,
+                    email,
+                    phone,
+                    password,
+                    role
+                };
+                
+                // Add massager-specific fields if applicable
+                if (role === 'massager') {
+                    userData.specialty = document.getElementById('register-specialty').value;
+                    userData.hourlyRate = document.getElementById('register-hourly-rate').value;
+                }
+                
                 // Try to register via API
                 const response = await fetch(ENDPOINTS.REGISTER, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name, email, phone, password })
+                    body: JSON.stringify(userData)
                 });
                 
                 if (response.ok) {
-                    const newUser = await response.json();
-                    loggedInUser = newUser;
-                    localStorage.setItem('dimple_user', JSON.stringify(newUser));
+                    const data = await response.json();
+                    loggedInUser = data.data.user;
+                    localStorage.setItem('dimple_user', JSON.stringify(loggedInUser));
+                    localStorage.setItem('dimple_token', data.token);
                     registerModal.style.display = 'none';
                     updateAuthUI();
                     showToast('Registration successful! You are now logged in.');
@@ -1301,7 +1507,17 @@
                         return;
                     }
                     
-                    const newUser = { name, email, phone, password };
+                    const newUser = { 
+                        id: Date.now(), 
+                        name, 
+                        email, 
+                        phone, 
+                        password, 
+                        role,
+                        specialty: role === 'massager' ? document.getElementById('register-specialty').value : undefined,
+                        hourlyRate: role === 'massager' ? document.getElementById('register-hourly-rate').value : undefined
+                    };
+                    
                     users.push(newUser);
                     localStorage.setItem('dimple_users', JSON.stringify(users));
                     localStorage.setItem('dimple_user', JSON.stringify(newUser));
@@ -1320,7 +1536,17 @@
                     return;
                 }
                 
-                const newUser = { name, email, phone, password };
+                const newUser = { 
+                    id: Date.now(), 
+                    name, 
+                    email, 
+                    phone, 
+                    password, 
+                    role,
+                    specialty: role === 'massager' ? document.getElementById('register-specialty').value : undefined,
+                    hourlyRate: role === 'massager' ? document.getElementById('register-hourly-rate').value : undefined
+                };
+                
                 users.push(newUser);
                 localStorage.setItem('dimple_users', JSON.stringify(users));
                 localStorage.setItem('dimple_user', JSON.stringify(newUser));
@@ -1332,8 +1558,8 @@
             }
         }
 
-        // Handle proceed to payment
-        function handleProceedToPayment() {
+        // Handle payment
+        async function handlePayment() {
             if (!loggedInUser) {
                 showToast('Please login to book a massage', 'error');
                 loginModal.style.display = 'flex';
@@ -1348,75 +1574,74 @@
                 return;
             }
             
-            // Create booking object
-            currentBooking = {
-                massagerId: selectedMassager.id,
-                massagerName: selectedMassager.name,
-                date,
-                time,
-                price: selectedMassager.price,
-                userId: loggedInUser.id || loggedInUser.email,
-                userName: loggedInUser.name
-            };
-            
             // Show payment modal
-            document.getElementById('payment-amount').textContent = `${selectedMassager.price} ETB`;
+            const paymentDetails = document.getElementById('payment-details');
+            paymentDetails.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    <div style="font-size: 3rem; margin-right: 15px;">${selectedMassager.image}</div>
+                    <div>
+                        <h3>${selectedMassager.name}</h3>
+                        <p>Date: ${new Date(date).toDateString()}</p>
+                        <p>Time: ${time}</p>
+                        <p><strong>Total: ${selectedMassager.price} ETB</strong></p>
+                    </div>
+                </div>
+            `;
+            
             bookingModal.style.display = 'none';
             paymentModal.style.display = 'flex';
-            
-            // Simulate payment process
-            let countdown = 10;
-            const countdownElement = document.getElementById('payment-countdown');
-            countdownElement.textContent = countdown;
-            
-            const countdownInterval = setInterval(() => {
-                countdown--;
-                countdownElement.textContent = countdown;
-                
-                if (countdown <= 0) {
-                    clearInterval(countdownInterval);
-                    confirmPaymentBtn.style.display = 'block';
-                }
-            }, 1000);
         }
 
-        // Handle payment completion
-        async function handlePaymentCompletion() {
+        // Confirm payment
+        async function confirmPayment() {
+            const phone = document.getElementById('telebirr-phone').value;
+            const pin = document.getElementById('telebirr-pin').value;
+            
+            if (!phone || !pin) {
+                showToast('Please enter your Telebirr phone number and PIN', 'error');
+                return;
+            }
+            
             try {
+                const date = document.getElementById('booking-date').value;
+                const time = document.getElementById('booking-time').value;
+                
                 // Create booking
                 const bookingData = {
                     massagerId: selectedMassager.id,
                     massagerName: selectedMassager.name,
-                    date: currentBooking.date,
-                    time: currentBooking.time,
+                    massagerImage: selectedMassager.image,
+                    date,
+                    time,
                     price: selectedMassager.price,
                     userId: loggedInUser.id || loggedInUser.email,
-                    userName: loggedInUser.name
+                    userName: loggedInUser.name,
+                    telebirrPhone: phone,
+                    status: 'confirmed'
                 };
                 
                 // Try to save booking via API
+                const token = localStorage.getItem('dimple_token');
                 const response = await fetch(ENDPOINTS.BOOKINGS, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(bookingData)
                 });
                 
                 if (response.ok) {
-                    const booking = await response.json();
+                    const data = await response.json();
                     
                     // Send notification to massager
-                    await notifyMassager(booking);
-                    
-                    // Send to Telegram channel
-                    await shareToTelegram(booking);
+                    await sendMassagerNotification(bookingData);
                     
                     paymentModal.style.display = 'none';
                     showToast('Payment successful! Your booking is confirmed.');
                     
-                    // Reload bookings
-                    loadUserBookings();
+                    // Share to Telegram channel
+                    shareToTelegram(bookingData);
                 } else {
                     throw new Error('API not available');
                 }
@@ -1428,34 +1653,32 @@
                     id: Date.now(),
                     massagerId: selectedMassager.id,
                     massagerName: selectedMassager.name,
-                    date: new Date(currentBooking.date),
-                    time: currentBooking.time,
+                    massagerImage: selectedMassager.image,
+                    date: document.getElementById('booking-date').value,
+                    time: document.getElementById('booking-time').value,
                     price: selectedMassager.price,
                     userId: loggedInUser.id || loggedInUser.email,
                     userName: loggedInUser.name,
                     status: 'confirmed',
-                    createdAt: new Date()
+                    createdAt: new Date().toISOString()
                 };
                 
                 bookings.push(bookingData);
                 localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
                 
                 // Send notification to massager
-                await notifyMassager(bookingData);
-                
-                // Send to Telegram channel
-                await shareToTelegram(bookingData);
+                await sendMassagerNotification(bookingData);
                 
                 paymentModal.style.display = 'none';
                 showToast('Payment successful! Your booking is confirmed.');
                 
-                // Reload bookings
-                loadUserBookings();
+                // Share to Telegram channel
+                shareToTelegram(bookingData);
             }
         }
 
-        // Handle rating submission
-        async function handleRatingSubmission() {
+        // Submit rating
+        async function submitRating() {
             const rating = document.querySelector('input[name="rating"]:checked');
             const comment = document.getElementById('review-comment').value;
             
@@ -1465,213 +1688,197 @@
             }
             
             try {
-                // Submit rating via API
+                const ratingData = {
+                    bookingId: selectedBooking.id,
+                    massagerId: selectedBooking.massagerId,
+                    userId: loggedInUser.id || loggedInUser.email,
+                    rating: rating.value,
+                    comment
+                };
+                
+                // Try to submit rating via API
+                const token = localStorage.getItem('dimple_token');
                 const response = await fetch(ENDPOINTS.RATINGS, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({
-                        massagerId: currentBooking.massagerId,
-                        bookingId: currentBooking.id,
-                        rating: rating.value,
-                        comment
-                    })
+                    body: JSON.stringify(ratingData)
                 });
                 
                 if (response.ok) {
-                    ratingModal.style.display = 'none';
-                    showToast('Thank you for your feedback!');
+                    // Update local booking with rating
+                    const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
+                    const bookingIndex = bookings.findIndex(b => b.id == selectedBooking.id);
                     
-                    // Update massager rating in UI
-                    const massager = sampleMassagers.find(m => m.id === currentBooking.massagerId);
-                    if (massager) {
-                        // Simple average calculation for demo
-                        const newReviews = massager.reviews + 1;
-                        const newRating = ((massager.rating * massager.reviews) + parseInt(rating.value)) / newReviews;
-                        massager.rating = newRating.toFixed(1);
-                        massager.reviews = newReviews;
-                        
-                        // Re-render massagers
-                        renderMassagers();
+                    if (bookingIndex !== -1) {
+                        bookings[bookingIndex].rating = rating.value;
+                        bookings[bookingIndex].review = comment;
+                        localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
                     }
+                    
+                    ratingModal.style.display = 'none';
+                    showToast('Thank you for your rating!');
+                    
+                    // Reload bookings to show the updated rating
+                    loadUserBookings();
                 } else {
                     throw new Error('API not available');
                 }
             } catch (error) {
                 console.error('Rating error:', error);
                 // Fallback to local storage
-                const ratings = JSON.parse(localStorage.getItem('dimple_ratings') || '[]');
-                ratings.push({
-                    massagerId: currentBooking.massagerId,
-                    bookingId: currentBooking.id,
-                    rating: rating.value,
-                    comment,
-                    createdAt: new Date()
-                });
+                const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
+                const bookingIndex = bookings.findIndex(b => b.id == selectedBooking.id);
                 
-                localStorage.setItem('dimple_ratings', JSON.stringify(ratings));
+                if (bookingIndex !== -1) {
+                    bookings[bookingIndex].rating = rating.value;
+                    bookings[bookingIndex].review = comment;
+                    localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
+                }
                 
                 ratingModal.style.display = 'none';
-                showToast('Thank you for your feedback!');
+                showToast('Thank you for your rating!');
                 
-                // Update massager rating in UI
-                const massager = sampleMassagers.find(m => m.id === currentBooking.massagerId);
-                if (massager) {
-                    // Simple average calculation for demo
-                    const newReviews = massager.reviews + 1;
-                    const newRating = ((massager.rating * massager.reviews) + parseInt(rating.value)) / newReviews;
-                    massager.rating = newRating.toFixed(1);
-                    massager.reviews = newReviews;
-                    
-                    // Re-render massagers
-                    renderMassagers();
-                }
+                // Reload bookings to show the updated rating
+                loadUserBookings();
             }
         }
 
-        // Load user bookings
-        async function loadUserBookings() {
-            if (!loggedInUser) return;
-            
+        // Cancel booking
+        async function cancelBooking(bookingId) {
             try {
-                // Try to fetch from API
-                const response = await fetch(`${ENDPOINTS.BOOKINGS}`, {
+                // Try to cancel via API
+                const token = localStorage.getItem('dimple_token');
+                const response = await fetch(`${ENDPOINTS.BOOKINGS}/${bookingId}`, {
+                    method: 'DELETE',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('dimple_token')}`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
                 
                 if (response.ok) {
-                    const data = await response.json();
-                    displayBookings(data.bookings);
+                    // Update local booking
+                    const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
+                    const bookingIndex = bookings.findIndex(b => b.id == bookingId);
+                    
+                    if (bookingIndex !== -1) {
+                        bookings[bookingIndex].status = 'cancelled';
+                        localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
+                    }
+                    
+                    showToast('Booking cancelled successfully');
+                    
+                    // Reload bookings
+                    loadUserBookings();
                 } else {
                     throw new Error('API not available');
                 }
             } catch (error) {
+                console.error('Cancel error:', error);
                 // Fallback to local storage
                 const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-                const userBookings = bookings.filter(b => b.userId === (loggedInUser.id || loggedInUser.email));
-                displayBookings(userBookings);
-            }
-        }
-
-        // Display bookings
-        function displayBookings(bookings) {
-            bookingsContainer.innerHTML = '';
-            
-            if (bookings.length === 0) {
-                bookingsContainer.innerHTML = '<p style="text-align: center;">You have no bookings yet.</p>';
-                return;
-            }
-            
-            // Sort bookings by date (newest first)
-            bookings.sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
-            
-            bookings.forEach(booking => {
-                const bookingDate = new Date(booking.date || booking.createdAt);
-                const isPastBooking = bookingDate < new Date();
-                const canRate = isPastBooking && booking.status === 'confirmed' && !booking.rated;
+                const bookingIndex = bookings.findIndex(b => b.id == bookingId);
                 
-                const bookingItem = document.createElement('div');
-                bookingItem.className = 'booking-item';
-                bookingItem.innerHTML = `
-                    <div class="booking-header">
-                        <h3>${booking.massagerName}</h3>
-                        <span class="booking-status status-${booking.status}">${booking.status}</span>
-                    </div>
-                    <p>Date: ${bookingDate.toDateString()}</p>
-                    <p>Time: ${booking.time}</p>
-                    <p>Price: ${booking.price} ETB</p>
-                    ${canRate ? `<button class="btn btn-primary rate-booking" data-id="${booking.id}">Rate Experience</button>` : ''}
-                `;
+                if (bookingIndex !== -1) {
+                    bookings[bookingIndex].status = 'cancelled';
+                    localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
+                }
                 
-                bookingsContainer.appendChild(bookingItem);
-            });
-            
-            // Add event listeners to rate buttons
-            document.querySelectorAll('.rate-booking').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const bookingId = this.getAttribute('data-id');
-                    openRatingModal(bookingId);
-                });
-            });
-        }
-
-        // Open rating modal
-        function openRatingModal(bookingId) {
-            // Find booking
-            const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-            const booking = bookings.find(b => b.id == bookingId);
-            
-            if (!booking) {
-                showToast('Booking not found', 'error');
-                return;
+                showToast('Booking cancelled successfully');
+                
+                // Reload bookings
+                loadUserBookings();
             }
-            
-            currentBooking = booking;
-            
-            // Set massager name
-            document.getElementById('massager-rating-name').textContent = booking.massagerName;
-            
-            // Clear previous rating
-            document.querySelectorAll('input[name="rating"]').forEach(input => {
-                input.checked = false;
-            });
-            document.getElementById('review-comment').value = '';
-            
-            ratingModal.style.display = 'flex';
         }
 
-        // Notify massager
-        async function notifyMassager(booking) {
+        // Send notification to massager
+        async function sendMassagerNotification(bookingData) {
             try {
-                // Send notification via API
+                const notificationData = {
+                    massagerId: bookingData.massagerId,
+                    message: `New booking from ${bookingData.userName} on ${new Date(bookingData.date).toDateString()} at ${bookingData.time}`
+                };
+                
+                // Try to send notification via API
+                const token = localStorage.getItem('dimple_token');
                 await fetch(ENDPOINTS.NOTIFICATIONS, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({
-                        massagerId: booking.massagerId,
-                        message: `New booking: ${booking.userName} on ${new Date(booking.date).toDateString()} at ${booking.time}`
-                    })
+                    body: JSON.stringify(notificationData)
                 });
             } catch (error) {
                 console.error('Notification error:', error);
-                // Simulate notification in console
-                console.log(`Notification to massager ${booking.massagerId}: ${booking.userName} booked a session on ${new Date(booking.date).toDateString()} at ${booking.time}`);
+                // In a real app, this would send an email or SMS to the massager
+                console.log(`Notification to massager: New booking from ${bookingData.userName}`);
             }
         }
 
+        // Share booking
+        function shareBooking(platform) {
+            const message = `I just booked a massage session with ${selectedMassager.name} on Dimple!`;
+            let url = '';
+            
+            switch(platform) {
+                case 'telegram':
+                    url = `https://t.me/share/url?url=https://dimple.com&text=${encodeURIComponent(message)}`;
+                    break;
+                case 'whatsapp':
+                    url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                    break;
+            }
+            
+            window.open(url, '_blank');
+        }
+
         // Share to Telegram channel
-        async function shareToTelegram(booking) {
+        async function shareToTelegram(bookingData) {
             try {
-                const message = `New booking: ${booking.userName} booked ${booking.massagerName} on ${new Date(booking.date).toDateString()} at ${booking.time} for ${booking.price} ETB`;
+                const message = `New booking: ${bookingData.userName} booked ${bookingData.massagerName} on ${new Date(bookingData.date).toDateString()} at ${bookingData.time} for ${bookingData.price} ETB`;
                 
                 // Try to send to Telegram via API
+                const token = localStorage.getItem('dimple_token');
                 await fetch(ENDPOINTS.TELEGRAM, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({ message })
                 });
             } catch (error) {
                 console.error('Telegram sharing error:', error);
                 // In a real implementation, this would use the Telegram Bot API
-                console.log(`Sharing booking to Telegram channel @lelaworker: ${booking.userName} booked ${booking.massagerName}`);
+                console.log(`Sharing booking to Telegram channel @lelaworker: ${bookingData.userName} booked ${bookingData.massagerName}`);
             }
         }
 
         // Handle logout
-        function handleLogout() {
-            loggedInUser = null;
-            localStorage.removeItem('dimple_user');
-            localStorage.removeItem('dimple_token');
-            profileModal.style.display = 'none';
-            updateAuthUI();
-            showToast('You have been logged out');
+        async function handleLogout() {
+            try {
+                // Try to logout via API
+                const token = localStorage.getItem('dimple_token');
+                await fetch(ENDPOINTS.LOGOUT, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            } finally {
+                // Clear local storage and reset state
+                localStorage.removeItem('dimple_user');
+                localStorage.removeItem('dimple_token');
+                loggedInUser = null;
+                profileModal.style.display = 'none';
+                updateAuthUI();
+                showToast('You have been logged out');
+            }
         }
 
         // Generate PWA manifest

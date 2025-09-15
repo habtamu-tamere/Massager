@@ -1,31 +1,51 @@
 const mongoose = require('mongoose');
 
 const massagerSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  specialty: {
-    type: String,
-    required: true,
-    enum: ['Swedish', 'Deep Tissue', 'Aromatherapy', 'Hot Stone', 'Thai', 'Shiatsu']
-  },
-  rating: {
-    type: Number,
-    min: 0,
-    max: 5,
-    default: 4.5
-  },
-  price: {
-    type: Number,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
-  image: {
-    type: String,
-    default: '💆'
+  specialties: {
+    type: [String],
+    required: true
   },
-  available: {
+  experience: {
+    type: Number,
+    default: 0
+  },
+  description: {
+    type: String,
+    maxlength: 500
+  },
+  hourlyRate: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  availability: [{
+    day: {
+      type: String,
+      enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    },
+    slots: [{
+      start: String,
+      end: String,
+      isAvailable: {
+        type: Boolean,
+        default: true
+      }
+    }]
+  }],
+  images: [{
+    url: String,
+    caption: String
+  }],
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  isAvailable: {
     type: Boolean,
     default: true
   }

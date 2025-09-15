@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -38,12 +39,20 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Mount routers
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// API routes
 app.use('/api/auth', auth);
 app.use('/api/bookings', bookings);
 app.use('/api/massagers', massagers);
 app.use('/api/payments', payments);
 app.use('/api/ratings', ratings);
+
+// Serve the main HTML file for all other requests (client-side routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Error handler middleware
 app.use(errorHandler);

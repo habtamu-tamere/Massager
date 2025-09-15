@@ -27,7 +27,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Enable CORS
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'https://massager-v992.onrender.com',
+  credentials: true
+}));
 
 // Set security headers
 app.use(helmet());
@@ -39,17 +42,17 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Serve static files from public directory
+// Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API routes
+// Mount routers
 app.use('/api/auth', auth);
 app.use('/api/bookings', bookings);
 app.use('/api/massagers', massagers);
 app.use('/api/payments', payments);
 app.use('/api/ratings', ratings);
 
-// Serve the main HTML file for all other requests (client-side routing)
+// Serve the frontend for all other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

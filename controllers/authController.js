@@ -10,30 +10,16 @@ const sendTokenResponse = (user, statusCode, res) => {
     { expiresIn: process.env.JWT_EXPIRE }
   );
 
-  const options = {
-    expires: new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days
-    ),
-    httpOnly: true
-  };
-
-  if (process.env.NODE_ENV === 'production') {
-    options.secure = true;
-  }
-
-  res
-    .status(statusCode)
-    .cookie('token', token, options)
-    .json({
-      success: true,
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        phone: user.phone,
-        role: user.role
-      }
-    });
+  res.status(statusCode).json({
+    success: true,
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      phone: user.phone,
+      role: user.role
+    }
+  });
 };
 
 // @desc    Register user
@@ -41,7 +27,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 // @access  Public
 exports.register = async (req, res, next) => {
   try {
-    const { name, phone, password, role, services, gender, location, availability } = req.body;
+    const { name, phone, password, role, services, gender, location, availability, hourlyRate } = req.body;
 
     // Create user
     const user = await User.create({
@@ -52,7 +38,8 @@ exports.register = async (req, res, next) => {
       services: role === 'massager' ? services : undefined,
       gender: role === 'massager' ? gender : undefined,
       location: role === 'massager' ? location : undefined,
-      availability: role === 'massager' ? availability : undefined
+      availability: role === 'massager' ? availability : undefined,
+      hourlyRate: role === 'massager' ? hourlyRate : undefined
     });
 
     sendTokenResponse(user, 200, res);
@@ -76,7 +63,7 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // Check for user
+    // Check for user with password field
     const user = await User.findOne({ phone }).select('+password');
 
     if (!user) {
@@ -118,25 +105,6 @@ exports.getMe = async (req, res, next) => {
   }
 };
 
-// @desc    Log user out / clear cookie
-// @route   GET /api/auth/logout
-// @access  Private
-exports.logout = async (req, res, next) => {
-  try {
-    res.cookie('token', 'none', {
-      expires: new Date(Date.now() + 10 * 1000),
-      httpOnly: true
-    });
-
-    res.status(200).json({
-      success: true,
-      data: {}
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // @desc    Update user details
 // @route   PUT /api/auth/updatedetails
 // @access  Private
@@ -153,6 +121,7 @@ exports.updateDetails = async (req, res, next) => {
       fieldsToUpdate.gender = req.body.gender;
       fieldsToUpdate.location = req.body.location;
       fieldsToUpdate.availability = req.body.availability;
+      fieldsToUpdate.hourlyRate = req.body.hourlyRate;
     }
 
     const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {

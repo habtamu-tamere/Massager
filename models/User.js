@@ -50,6 +50,13 @@ const userSchema = new mongoose.Schema({
       return this.role === 'massager';
     }
   },
+  hourlyRate: {
+    type: Number,
+    min: 0,
+    required: function() {
+      return this.role === 'massager';
+    }
+  },
   rating: {
     average: {
       type: Number,

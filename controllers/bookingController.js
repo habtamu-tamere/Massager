@@ -23,7 +23,7 @@ exports.getBookings = async (req, res, next) => {
 
     const bookings = await Booking.find(query)
       .populate('client', 'name phone')
-      .populate('massager', 'name services')
+      .populate('massager', 'name services rating')
       .sort({ date: -1, startTime: -1 });
 
     res.status(200).json({
@@ -110,7 +110,7 @@ exports.createBooking = async (req, res, next) => {
 
     // Calculate end time based on duration
     const startTime = req.body.startTime;
-    const duration = req.body.duration;
+    const duration = req.body.duration || 1; // Default to 1 hour
     const [hours, minutes] = startTime.split(':').map(Number);
     const endTimeDate = new Date(0, 0, 0, hours, minutes);
     endTimeDate.setHours(endTimeDate.getHours() + Math.floor(duration));

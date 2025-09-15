@@ -1,6 +1,6 @@
 const Payment = require('../models/Payment');
 const Booking = require('../models/Booking');
-const telebirrService = require('../services/telebirrService');
+const User = require('../models/User');
 
 // @desc    Initialize Telebirr payment
 // @route   POST /api/payments/telebirr/initiate
@@ -37,16 +37,10 @@ exports.initiateTelebirrPayment = async (req, res, next) => {
       });
     }
 
-    // Initialize payment with Telebirr
-    const paymentData = {
-      amount: booking.totalAmount,
-      clientPhone: phoneNumber,
-      clientName: booking.client.name,
-      bookingId: booking._id.toString(),
-      description: `Payment for massage session with ${booking.massager.name}`
-    };
-
-    const paymentResponse = await telebirrService.initiatePayment(paymentData);
+    // In a real implementation, this would call the Telebirr API
+    // For demo purposes, we'll simulate the payment initiation
+    const transactionId = 'TXN_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    const paymentUrl = `https://telebirr.com/pay/${transactionId}`;
 
     // Create payment record
     const payment = await Payment.create({
@@ -54,16 +48,19 @@ exports.initiateTelebirrPayment = async (req, res, next) => {
       client: req.user.id,
       amount: booking.totalAmount,
       paymentMethod: 'telebirr',
-      transactionId: paymentResponse.transactionId,
-      telebirrResponse: paymentResponse
+      transactionId: transactionId,
+      telebirrResponse: {
+        paymentUrl,
+        transactionId
+      }
     });
 
     res.status(200).json({
       success: true,
       data: {
         paymentId: payment._id,
-        paymentUrl: paymentResponse.paymentUrl,
-        transactionId: paymentResponse.transactionId
+        paymentUrl,
+        transactionId
       }
     });
   } catch (error) {
@@ -73,7 +70,7 @@ exports.initiateTelebirrPayment = async (req, res, next) => {
 
 // @desc    Verify Telebirr payment
 // @route   POST /api/payments/telebirr/verify
-// @access  Public (Telebirr will call this webhook)
+// @access  Public
 exports.verifyTelebirrPayment = async (req, res, next) => {
   try {
     const { transactionId, status } = req.body;
@@ -89,21 +86,19 @@ exports.verifyTelebirrPayment = async (req, res, next) => {
       });
     }
 
-    // Verify payment with Telebirr
-    const verification = await telebirrService.verifyPayment(transactionId);
-
-    if (verification.status === 'success') {
+    // In a real implementation, this would verify with Telebirr API
+    // For demo purposes, we'll simulate verification
+    if (status === 'success') {
       // Update payment status
       payment.status = 'completed';
-      payment.telebirrResponse.verification = verification;
+      payment.telebirrResponse.verification = { status: 'success' };
       await payment.save();
 
       // Update booking payment status
       payment.booking.paymentStatus = 'paid';
+      payment.booking.status = 'confirmed';
       await payment.booking.save();
 
-      // Send confirmation notification
-      // This would typically be implemented with a notification service
       console.log(`Payment confirmed for booking ${payment.booking._id}`);
     } else {
       payment.status = 'failed';
@@ -149,67 +144,6 @@ exports.getPayment = async (req, res, next) => {
       success: true,
       data: payment
     });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Process refund
-// @route   POST /api/payments/:id/refund
-// @access  Private (Admin only)
-exports.processRefund = async (req, res, next) => {
-  try {
-    const { reason } = req.body;
-
-    const payment = await Payment.findById(req.params.id)
-      .populate('booking');
-
-    if (!payment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Payment not found'
-      });
-    }
-
-    // Check if payment is eligible for refund
-    if (payment.status !== 'completed') {
-      return res.status(400).json({
-        success: false,
-        message: 'Only completed payments can be refunded'
-      });
-    }
-
-    // Process refund with Telebirr
-    const refundResponse = await telebirrService.processRefund({
-      transactionId: payment.transactionId,
-      amount: payment.amount,
-      reason: reason || 'Customer request'
-    });
-
-    if (refundResponse.status === 'success') {
-      // Update payment status
-      payment.status = 'refunded';
-      payment.refundAmount = payment.amount;
-      payment.refundReason = reason;
-      payment.telebirrResponse.refund = refundResponse;
-      await payment.save();
-
-      // Update booking status
-      payment.booking.paymentStatus = 'refunded';
-      await payment.booking.save();
-
-      res.status(200).json({
-        success: true,
-        message: 'Refund processed successfully',
-        data: refundResponse
-      });
-    } else {
-      res.status(400).json({
-        success: false,
-        message: 'Refund failed',
-        data: refundResponse
-      });
-    }
   } catch (error) {
     next(error);
   }

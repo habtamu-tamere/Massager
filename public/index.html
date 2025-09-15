@@ -580,6 +580,35 @@
             background-color: #FFEBEE;
             color: #D32F2F;
         }
+        
+        /* OTP Input */
+        .otp-container {
+            display: flex;
+            gap: 10px;
+            margin: 1rem 0;
+        }
+        
+        .otp-input {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-size: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .otp-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        /* Countdown timer */
+        .countdown {
+            text-align: center;
+            margin: 1rem 0;
+            color: var(--primary-dark);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -671,7 +700,6 @@
             </div>
             <div class="footer-section">
                 <h3>Contact Us</h3>
-                <p>Email: info@dimple.com</p>
                 <p>Phone: +251 123 456 789</p>
                 <p>Telegram: <a href="https://t.me/lelaworker" style="color: white;">@lelaworker</a></p>
             </div>
@@ -690,13 +718,13 @@
     <div class="modal" id="login-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Login</h2>
+                <h2>Login with Phone</h2>
                 <button class="close-modal">&times;</button>
             </div>
             <form id="login-form">
                 <div class="form-group">
-                    <label for="login-email">Email or Phone</label>
-                    <input type="text" id="login-email" class="form-control" required>
+                    <label for="login-phone">Phone Number</label>
+                    <input type="tel" id="login-phone" class="form-control" placeholder="+251XXXXXXXXX" required>
                 </div>
                 <div class="form-group">
                     <label for="login-password">Password</label>
@@ -734,12 +762,12 @@
                     <input type="text" id="register-name" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label for="register-email">Email</label>
-                    <input type="email" id="register-email" class="form-control" required>
+                    <label for="register-phone">Phone Number</label>
+                    <input type="tel" id="register-phone" class="form-control" placeholder="+251XXXXXXXXX" required>
                 </div>
                 <div class="form-group">
-                    <label for="register-phone">Phone Number</label>
-                    <input type="tel" id="register-phone" class="form-control" required>
+                    <label for="register-telegram">Telegram Username (optional)</label>
+                    <input type="text" id="register-telegram" class="form-control" placeholder="@username">
                 </div>
                 <div id="massager-fields" style="display: none;">
                     <div class="form-group">
@@ -770,6 +798,30 @@
             </form>
             <p style="text-align: center; margin-top: 1rem;">
                 Already have an account? <a href="#" id="switch-to-login">Login</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- OTP Verification Modal -->
+    <div class="modal" id="otp-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Verify Phone Number</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <p style="text-align: center; margin-bottom: 1rem;">We've sent a verification code to your phone</p>
+            <div class="otp-container">
+                <input type="text" class="otp-input" maxlength="1" data-index="0">
+                <input type="text" class="otp-input" maxlength="1" data-index="1">
+                <input type="text" class="otp-input" maxlength="1" data-index="2">
+                <input type="text" class="otp-input" maxlength="1" data-index="3">
+                <input type="text" class="otp-input" maxlength="1" data-index="4">
+                <input type="text" class="otp-input" maxlength="1" data-index="5">
+            </div>
+            <div class="countdown" id="countdown">02:00</div>
+            <button id="verify-otp" class="btn btn-primary" style="width: 100%;" disabled>Verify</button>
+            <p style="text-align: center; margin-top: 1rem;">
+                Didn't receive the code? <a href="#" id="resend-otp">Resend</a>
             </p>
         </div>
     </div>
@@ -883,14 +935,14 @@
     </div>
 
     <script>
-        // API endpoints
+        // API endpoints - Replace with your actual Render URL
         const API_BASE = 'https://your-render-app.onrender.com/api';
         const ENDPOINTS = {
             LOGIN: `${API_BASE}/auth/login`,
             REGISTER: `${API_BASE}/auth/register`,
+            VERIFY: `${API_BASE}/auth/verify`,
             MASSAGERS: `${API_BASE}/massagers`,
             BOOKINGS: `${API_BASE}/bookings`,
-            TELEGRAM: `${API_BASE}/telegram`,
             NOTIFICATIONS: `${API_BASE}/notifications`,
             RATINGS: `${API_BASE}/ratings`,
             LOGOUT: `${API_BASE}/auth/logout`
@@ -900,12 +952,13 @@
         const sampleMassagers = [];
         for (let i = 1; i <= 30; i++) {
             sampleMassagers.push({
-                id: i,
+                _id: `massager${i}`,
                 name: `Massager ${i}`,
                 specialty: ['Swedish', 'Deep Tissue', 'Aromatherapy', 'Hot Stone', 'Thai', 'Shiatsu'][Math.floor(Math.random() * 6)],
                 rating: (Math.random() * 2 + 3).toFixed(1), // Random rating between 3.0 and 5.0
                 price: Math.floor(Math.random() * 1000) + 500, // Random price between 500 and 1500
-                image: `💆‍${i % 2 ? '♂' : '♀'}️` // Alternate between male and female emoji
+                image: `💆‍${i % 2 ? '♂' : '♀'}️`, // Alternate between male and female emoji
+                reviewCount: Math.floor(Math.random() * 50) + 1
             });
         }
 
@@ -916,6 +969,8 @@
         let selectedMassager = null;
         let selectedBooking = null;
         let deferredPrompt = null;
+        let otpCountdown = null;
+        let currentOtp = '';
 
         // DOM elements
         const massagersContainer = document.getElementById('massagers-container');
@@ -924,6 +979,7 @@
         const paginationElement = document.getElementById('pagination');
         const loginModal = document.getElementById('login-modal');
         const registerModal = document.getElementById('register-modal');
+        const otpModal = document.getElementById('otp-modal');
         const bookingModal = document.getElementById('booking-modal');
         const paymentModal = document.getElementById('payment-modal');
         const ratingModal = document.getElementById('rating-modal');
@@ -939,10 +995,14 @@
         const proceedToPaymentBtn = document.getElementById('proceed-to-payment');
         const confirmPaymentBtn = document.getElementById('confirm-payment');
         const submitRatingBtn = document.getElementById('submit-rating');
+        const verifyOtpBtn = document.getElementById('verify-otp');
+        const resendOtpBtn = document.getElementById('resend-otp');
+        const countdownElement = document.getElementById('countdown');
         const toast = document.getElementById('toast');
         const roleOptions = document.querySelectorAll('.role-option');
         const massagerFields = document.getElementById('massager-fields');
         const registerRole = document.getElementById('register-role');
+        const otpInputs = document.querySelectorAll('.otp-input');
 
         // Initialize the app
         function init() {
@@ -963,7 +1023,7 @@
                 const response = await fetch(`${ENDPOINTS.MASSAGERS}?page=${currentPage}&limit=${itemsPerPage}`);
                 if (response.ok) {
                     const data = await response.json();
-                    displayMassagers(data.massagers);
+                    displayMassagers(data.massagers || data.data);
                     renderPagination(data.totalPages);
                 } else {
                     throw new Error('API not available');
@@ -983,7 +1043,7 @@
         function displayMassagers(massagers) {
             massagersContainer.innerHTML = '';
             
-            if (massagers.length === 0) {
+            if (!massagers || massagers.length === 0) {
                 massagersContainer.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">No massagers available at the moment.</p>';
                 return;
             }
@@ -1000,8 +1060,8 @@
                         <div class="massager-price">Price: ${massager.price} ETB/hr</div>
                     </div>
                     <div class="card-actions">
-                        <button class="btn btn-outline view-profile-btn" data-id="${massager.id}">View Profile</button>
-                        <button class="btn btn-primary book-btn" data-id="${massager.id}">Book Now</button>
+                        <button class="btn btn-outline view-profile-btn" data-id="${massager._id || massager.id}">View Profile</button>
+                        <button class="btn btn-primary book-btn" data-id="${massager._id || massager.id}">Book Now</button>
                     </div>
                 `;
                 massagersContainer.appendChild(card);
@@ -1010,7 +1070,7 @@
             // Add event listeners to the buttons
             document.querySelectorAll('.book-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const massagerId = parseInt(this.getAttribute('data-id'));
+                    const massagerId = this.getAttribute('data-id');
                     openBookingModal(massagerId);
                 });
             });
@@ -1083,14 +1143,14 @@
                 } else {
                     // Fallback to local storage
                     const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-                    const userBookings = bookings.filter(b => b.userId === loggedInUser.id || b.userId === loggedInUser.email);
+                    const userBookings = bookings.filter(b => b.userId === loggedInUser._id || b.userId === loggedInUser.phone);
                     displayBookings(userBookings);
                 }
             } catch (error) {
                 console.error('Error loading bookings:', error);
                 // Fallback to local storage
                 const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-                const userBookings = bookings.filter(b => b.userId === loggedInUser.id || b.userId === loggedInUser.email);
+                const userBookings = bookings.filter(b => b.userId === loggedInUser._id || b.userId === loggedInUser.phone);
                 displayBookings(userBookings);
             }
         }
@@ -1122,11 +1182,11 @@
                     }
                     <div class="card-actions">
                         ${booking.status === 'completed' && !booking.rating ? 
-                            `<button class="btn btn-primary rate-btn" data-id="${booking.id}">Rate Now</button>` : 
+                            `<button class="btn btn-primary rate-btn" data-id="${booking._id || booking.id}">Rate Now</button>` : 
                             ''
                         }
                         ${booking.status === 'confirmed' ? 
-                            `<button class="btn btn-outline cancel-btn" data-id="${booking.id}">Cancel Booking</button>` : 
+                            `<button class="btn btn-outline cancel-btn" data-id="${booking._id || booking.id}">Cancel Booking</button>` : 
                             ''
                         }
                     </div>
@@ -1152,9 +1212,20 @@
         }
 
         // Open booking modal
-        function openBookingModal(massagerId) {
-            // Try to find in sample data first
-            selectedMassager = sampleMassagers.find(m => m.id === massagerId);
+        async function openBookingModal(massagerId) {
+            try {
+                // Try to fetch massager details from API
+                const response = await fetch(`${ENDPOINTS.MASSAGERS}/${massagerId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    selectedMassager = data.data || data;
+                } else {
+                    throw new Error('API not available');
+                }
+            } catch (error) {
+                // Fallback to sample data
+                selectedMassager = sampleMassagers.find(m => m._id === massagerId || m.id === massagerId);
+            }
             
             if (!selectedMassager) {
                 showToast('Massager not found', 'error');
@@ -1181,9 +1252,27 @@
         }
 
         // Open rating modal
-        function openRatingModal(bookingId) {
-            const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-            selectedBooking = bookings.find(b => b.id == bookingId);
+        async function openRatingModal(bookingId) {
+            try {
+                // Try to fetch booking details from API
+                const token = localStorage.getItem('dimple_token');
+                const response = await fetch(`${ENDPOINTS.BOOKINGS}/${bookingId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    selectedBooking = data.data || data;
+                } else {
+                    throw new Error('API not available');
+                }
+            } catch (error) {
+                // Fallback to local storage
+                const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
+                selectedBooking = bookings.find(b => b._id == bookingId || b.id == bookingId);
+            }
             
             if (!selectedBooking) {
                 showToast('Booking not found', 'error');
@@ -1243,6 +1332,33 @@
                 });
             });
             
+            // OTP input handling
+            otpInputs.forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    
+                    if (value.length === 1 && index < 5) {
+                        otpInputs[index + 1].focus();
+                    }
+                    
+                    checkOtpComplete();
+                });
+                
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && e.target.value === '') {
+                        const index = parseInt(e.target.getAttribute('data-index'));
+                        if (index > 0) {
+                            otpInputs[index - 1].focus();
+                        }
+                    }
+                });
+            });
+            
+            // OTP verification
+            verifyOtpBtn.addEventListener('click', verifyOtp);
+            resendOtpBtn.addEventListener('click', resendOtp);
+            
             // Close modals when clicking outside
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.addEventListener('click', (e) => {
@@ -1257,6 +1373,7 @@
                 btn.addEventListener('click', () => {
                     loginModal.style.display = 'none';
                     registerModal.style.display = 'none';
+                    otpModal.style.display = 'none';
                     bookingModal.style.display = 'none';
                     paymentModal.style.display = 'none';
                     ratingModal.style.display = 'none';
@@ -1364,13 +1481,15 @@
                             <div>${loggedInUser.name}</div>
                         </div>
                         <div class="form-group">
-                            <label>Email</label>
-                            <div>${loggedInUser.email}</div>
-                        </div>
-                        <div class="form-group">
                             <label>Phone</label>
                             <div>${loggedInUser.phone}</div>
                         </div>
+                        ${loggedInUser.telegram ? `
+                        <div class="form-group">
+                            <label>Telegram</label>
+                            <div>${loggedInUser.telegram}</div>
+                        </div>
+                        ` : ''}
                         <div class="form-group">
                             <label>Role</label>
                             <div>${loggedInUser.role || 'user'}</div>
@@ -1391,12 +1510,12 @@
         // Handle login
         async function handleLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('login-email').value;
+            const phone = document.getElementById('login-phone').value;
             const password = document.getElementById('login-password').value;
             
             // Simple validation
-            if (!email || !password) {
-                showToast('Please enter both email and password', 'error');
+            if (!phone || !password) {
+                showToast('Please enter both phone number and password', 'error');
                 return;
             }
             
@@ -1407,7 +1526,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ phone, password })
                 });
                 
                 if (response.ok) {
@@ -1419,35 +1538,12 @@
                     updateAuthUI();
                     showToast('Login successful!');
                 } else {
-                    // Fallback to local storage check
-                    const users = JSON.parse(localStorage.getItem('dimple_users') || '[]');
-                    const user = users.find(u => (u.email === email || u.phone === email) && u.password === password);
-                    
-                    if (user) {
-                        loggedInUser = user;
-                        localStorage.setItem('dimple_user', JSON.stringify(user));
-                        loginModal.style.display = 'none';
-                        updateAuthUI();
-                        showToast('Login successful!');
-                    } else {
-                        showToast('Incorrect email or password', 'error');
-                    }
+                    const errorData = await response.json();
+                    showToast(errorData.message || 'Login failed', 'error');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                // Fallback to local storage check
-                const users = JSON.parse(localStorage.getItem('dimple_users') || '[]');
-                const user = users.find(u => (u.email === email || u.phone === email) && u.password === password);
-                
-                if (user) {
-                    loggedInUser = user;
-                    localStorage.setItem('dimple_user', JSON.stringify(user));
-                    loginModal.style.display = 'none';
-                    updateAuthUI();
-                    showToast('Login successful!');
-                } else {
-                    showToast('Incorrect email or password', 'error');
-                }
+                showToast('Network error. Please try again.', 'error');
             }
         }
 
@@ -1455,8 +1551,8 @@
         async function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('register-name').value;
-            const email = document.getElementById('register-email').value;
             const phone = document.getElementById('register-phone').value;
+            const telegram = document.getElementById('register-telegram').value;
             const password = document.getElementById('register-password').value;
             const confirmPassword = document.getElementById('register-confirm-password').value;
             const role = registerRole.value;
@@ -1470,11 +1566,15 @@
             try {
                 const userData = {
                     name,
-                    email,
                     phone,
                     password,
                     role
                 };
+                
+                // Add telegram if provided
+                if (telegram) {
+                    userData.telegram = telegram;
+                }
                 
                 // Add massager-specific fields if applicable
                 if (role === 'massager') {
@@ -1493,68 +1593,136 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    loggedInUser = data.data.user;
-                    localStorage.setItem('dimple_user', JSON.stringify(loggedInUser));
-                    localStorage.setItem('dimple_token', data.token);
+                    
+                    // Show OTP verification modal
                     registerModal.style.display = 'none';
-                    updateAuthUI();
-                    showToast('Registration successful! You are now logged in.');
+                    showOtpModal(phone);
+                    
                 } else {
-                    // Fallback to local storage
-                    const users = JSON.parse(localStorage.getItem('dimple_users') || '[]');
-                    if (users.some(u => u.email === email)) {
-                        showToast('User with this email already exists', 'error');
-                        return;
-                    }
-                    
-                    const newUser = { 
-                        id: Date.now(), 
-                        name, 
-                        email, 
-                        phone, 
-                        password, 
-                        role,
-                        specialty: role === 'massager' ? document.getElementById('register-specialty').value : undefined,
-                        hourlyRate: role === 'massager' ? document.getElementById('register-hourly-rate').value : undefined
-                    };
-                    
-                    users.push(newUser);
-                    localStorage.setItem('dimple_users', JSON.stringify(users));
-                    localStorage.setItem('dimple_user', JSON.stringify(newUser));
-                    
-                    loggedInUser = newUser;
-                    registerModal.style.display = 'none';
-                    updateAuthUI();
-                    showToast('Registration successful! You are now logged in.');
+                    const errorData = await response.json();
+                    showToast(errorData.message || 'Registration failed', 'error');
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                // Fallback to local storage
-                const users = JSON.parse(localStorage.getItem('dimple_users') || '[]');
-                if (users.some(u => u.email === email)) {
-                    showToast('User with this email already exists', 'error');
-                    return;
+                showToast('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Show OTP modal
+        function showOtpModal(phone) {
+            // Generate a random OTP (in production, this would be sent via SMS)
+            currentOtp = Math.floor(100000 + Math.random() * 900000).toString();
+            console.log(`OTP for ${phone}: ${currentOtp}`); // For testing purposes
+            
+            // Start countdown
+            startOtpCountdown();
+            
+            otpModal.style.display = 'flex';
+        }
+
+        // Start OTP countdown
+        function startOtpCountdown() {
+            let timeLeft = 120; // 2 minutes
+            
+            // Clear previous countdown if any
+            if (otpCountdown) {
+                clearInterval(otpCountdown);
+            }
+            
+            otpCountdown = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(otpCountdown);
+                    verifyOtpBtn.disabled = true;
                 }
                 
-                const newUser = { 
-                    id: Date.now(), 
-                    name, 
-                    email, 
-                    phone, 
-                    password, 
-                    role,
-                    specialty: role === 'massager' ? document.getElementById('register-specialty').value : undefined,
-                    hourlyRate: role === 'massager' ? document.getElementById('register-hourly-rate').value : undefined
-                };
+                timeLeft--;
+            }, 1000);
+        }
+
+        // Check if OTP is complete
+        function checkOtpComplete() {
+            let otp = '';
+            otpInputs.forEach(input => {
+                otp += input.value;
+            });
+            
+            verifyOtpBtn.disabled = otp.length !== 6;
+        }
+
+        // Verify OTP
+        async function verifyOtp() {
+            let enteredOtp = '';
+            otpInputs.forEach(input => {
+                enteredOtp += input.value;
+            });
+            
+            if (enteredOtp === currentOtp) {
+                try {
+                    // Verify OTP with server
+                    const phone = document.getElementById('register-phone').value;
+                    const response = await fetch(ENDPOINTS.VERIFY, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ phone, otp: enteredOtp })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        loggedInUser = data.data.user;
+                        localStorage.setItem('dimple_user', JSON.stringify(loggedInUser));
+                        localStorage.setItem('dimple_token', data.token);
+                        
+                        otpModal.style.display = 'none';
+                        updateAuthUI();
+                        showToast('Registration successful! You are now logged in.');
+                    } else {
+                        const errorData = await response.json();
+                        showToast(errorData.message || 'Verification failed', 'error');
+                    }
+                } catch (error) {
+                    console.error('Verification error:', error);
+                    showToast('Network error. Please try again.', 'error');
+                }
+            } else {
+                showToast('Invalid verification code', 'error');
+            }
+        }
+
+        // Resend OTP
+        async function resendOtp() {
+            const phone = document.getElementById('register-phone').value;
+            
+            try {
+                const response = await fetch(`${ENDPOINTS.VERIFY}/resend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phone })
+                });
                 
-                users.push(newUser);
-                localStorage.setItem('dimple_users', JSON.stringify(users));
-                localStorage.setItem('dimple_user', JSON.stringify(newUser));
-                
-                loggedInUser = newUser;
-                registerModal.style.display = 'none';
-                updateAuthUI();
-                showToast('Registration successful! You are now logged in.');
+                if (response.ok) {
+                    // Generate new OTP
+                    currentOtp = Math.floor(100000 + Math.random() * 900000).toString();
+                    console.log(`New OTP for ${phone}: ${currentOtp}`); // For testing purposes
+                    
+                    // Reset and restart countdown
+                    startOtpCountdown();
+                    showToast('Verification code sent again');
+                } else {
+                    const errorData = await response.json();
+                    showToast(errorData.message || 'Failed to resend code', 'error');
+                }
+            } catch (error) {
+                console.error('Resend error:', error);
+                showToast('Network error. Please try again.', 'error');
             }
         }
 
@@ -1608,13 +1776,13 @@
                 
                 // Create booking
                 const bookingData = {
-                    massagerId: selectedMassager.id,
+                    massagerId: selectedMassager._id || selectedMassager.id,
                     massagerName: selectedMassager.name,
                     massagerImage: selectedMassager.image,
                     date,
                     time,
                     price: selectedMassager.price,
-                    userId: loggedInUser.id || loggedInUser.email,
+                    userId: loggedInUser._id,
                     userName: loggedInUser.name,
                     telebirrPhone: phone,
                     status: 'confirmed'
@@ -1634,46 +1802,21 @@
                 if (response.ok) {
                     const data = await response.json();
                     
-                    // Send notification to massager
-                    await sendMassagerNotification(bookingData);
+                    // Send notification to massager via Telegram
+                    await sendMassagerNotification(data.data || data);
                     
                     paymentModal.style.display = 'none';
                     showToast('Payment successful! Your booking is confirmed.');
                     
                     // Share to Telegram channel
-                    shareToTelegram(bookingData);
+                    shareToTelegram(data.data || data);
                 } else {
-                    throw new Error('API not available');
+                    const errorData = await response.json();
+                    showToast(errorData.message || 'Booking failed', 'error');
                 }
             } catch (error) {
                 console.error('Booking error:', error);
-                // Fallback to local storage
-                const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-                const bookingData = {
-                    id: Date.now(),
-                    massagerId: selectedMassager.id,
-                    massagerName: selectedMassager.name,
-                    massagerImage: selectedMassager.image,
-                    date: document.getElementById('booking-date').value,
-                    time: document.getElementById('booking-time').value,
-                    price: selectedMassager.price,
-                    userId: loggedInUser.id || loggedInUser.email,
-                    userName: loggedInUser.name,
-                    status: 'confirmed',
-                    createdAt: new Date().toISOString()
-                };
-                
-                bookings.push(bookingData);
-                localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
-                
-                // Send notification to massager
-                await sendMassagerNotification(bookingData);
-                
-                paymentModal.style.display = 'none';
-                showToast('Payment successful! Your booking is confirmed.');
-                
-                // Share to Telegram channel
-                shareToTelegram(bookingData);
+                showToast('Network error. Please try again.', 'error');
             }
         }
 
@@ -1689,9 +1832,9 @@
             
             try {
                 const ratingData = {
-                    bookingId: selectedBooking.id,
+                    bookingId: selectedBooking._id || selectedBooking.id,
                     massagerId: selectedBooking.massagerId,
-                    userId: loggedInUser.id || loggedInUser.email,
+                    userId: loggedInUser._id,
                     rating: rating.value,
                     comment
                 };
@@ -1708,41 +1851,18 @@
                 });
                 
                 if (response.ok) {
-                    // Update local booking with rating
-                    const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-                    const bookingIndex = bookings.findIndex(b => b.id == selectedBooking.id);
-                    
-                    if (bookingIndex !== -1) {
-                        bookings[bookingIndex].rating = rating.value;
-                        bookings[bookingIndex].review = comment;
-                        localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
-                    }
-                    
                     ratingModal.style.display = 'none';
                     showToast('Thank you for your rating!');
                     
                     // Reload bookings to show the updated rating
                     loadUserBookings();
                 } else {
-                    throw new Error('API not available');
+                    const errorData = await response.json();
+                    showToast(errorData.message || 'Rating submission failed', 'error');
                 }
             } catch (error) {
                 console.error('Rating error:', error);
-                // Fallback to local storage
-                const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-                const bookingIndex = bookings.findIndex(b => b.id == selectedBooking.id);
-                
-                if (bookingIndex !== -1) {
-                    bookings[bookingIndex].rating = rating.value;
-                    bookings[bookingIndex].review = comment;
-                    localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
-                }
-                
-                ratingModal.style.display = 'none';
-                showToast('Thank you for your rating!');
-                
-                // Reload bookings to show the updated rating
-                loadUserBookings();
+                showToast('Network error. Please try again.', 'error');
             }
         }
 
@@ -1759,46 +1879,26 @@
                 });
                 
                 if (response.ok) {
-                    // Update local booking
-                    const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-                    const bookingIndex = bookings.findIndex(b => b.id == bookingId);
-                    
-                    if (bookingIndex !== -1) {
-                        bookings[bookingIndex].status = 'cancelled';
-                        localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
-                    }
-                    
                     showToast('Booking cancelled successfully');
                     
                     // Reload bookings
                     loadUserBookings();
                 } else {
-                    throw new Error('API not available');
+                    const errorData = await response.json();
+                    showToast(errorData.message || 'Cancellation failed', 'error');
                 }
             } catch (error) {
                 console.error('Cancel error:', error);
-                // Fallback to local storage
-                const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-                const bookingIndex = bookings.findIndex(b => b.id == bookingId);
-                
-                if (bookingIndex !== -1) {
-                    bookings[bookingIndex].status = 'cancelled';
-                    localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
-                }
-                
-                showToast('Booking cancelled successfully');
-                
-                // Reload bookings
-                loadUserBookings();
+                showToast('Network error. Please try again.', 'error');
             }
         }
 
-        // Send notification to massager
+        // Send notification to massager via Telegram
         async function sendMassagerNotification(bookingData) {
             try {
                 const notificationData = {
                     massagerId: bookingData.massagerId,
-                    message: `New booking from ${bookingData.userName} on ${new Date(bookingData.date).toDateString()} at ${bookingData.time}`
+                    message: `New booking from ${bookingData.userName} on ${new Date(bookingData.date).toDateString()} at ${bookingData.time} for ${bookingData.price} ETB`
                 };
                 
                 // Try to send notification via API
@@ -1813,8 +1913,7 @@
                 });
             } catch (error) {
                 console.error('Notification error:', error);
-                // In a real app, this would send an email or SMS to the massager
-                console.log(`Notification to massager: New booking from ${bookingData.userName}`);
+                // In a real app, this would send a Telegram message to the massager
             }
         }
 
@@ -1852,8 +1951,6 @@
                 });
             } catch (error) {
                 console.error('Telegram sharing error:', error);
-                // In a real implementation, this would use the Telegram Bot API
-                console.log(`Sharing booking to Telegram channel @lelaworker: ${bookingData.userName} booked ${bookingData.massagerName}`);
             }
         }
 

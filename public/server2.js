@@ -1,7 +1,7 @@
 <script>
   // API base URL - change this to your server URL in production
   const API_BASE_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5000/api' 
+    ? 'https://massager-v992.onrender.com/api' 
     : '/api';
 
   // Current state

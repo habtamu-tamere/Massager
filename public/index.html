@@ -458,53 +458,18 @@
             background-color: #1DA1F2;
         }
         
-        /* Loading spinner */
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left: 4px solid var(--primary-color);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Toast notifications */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 4px;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .toast.show {
-            opacity: 1;
-        }
-        
         /* Role selection */
         .role-selection {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             margin-bottom: 1rem;
         }
         
         .role-option {
             flex: 1;
-            padding: 15px;
             border: 2px solid #ddd;
             border-radius: 8px;
+            padding: 15px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
@@ -531,83 +496,20 @@
             cursor: pointer;
             width: 30px;
             height: 30px;
-            background: #ccc;
+            background: #fff;
+            border-radius: 50%;
             display: flex;
-            justify-content: center;
             align-items: center;
-            color: #fff;
+            justify-content: center;
             font-size: 1.5rem;
+            color: #ddd;
+            transition: all 0.3s;
         }
         
+        .rating input:checked ~ label,
         .rating label:hover,
-        .rating label:hover ~ label,
-        .rating input:checked ~ label {
-            background: #FF9800;
-        }
-        
-        /* Booking history */
-        .booking-history {
-            margin: 2rem 0;
-        }
-        
-        .booking-item {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: var(--shadow);
-        }
-        
-        .booking-status {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .status-confirmed {
-            background-color: #E8F5E9;
-            color: var(--primary-dark);
-        }
-        
-        .status-completed {
-            background-color: #E3F2FD;
-            color: #1976D2;
-        }
-        
-        .status-cancelled {
-            background-color: #FFEBEE;
-            color: #D32F2F;
-        }
-        
-        /* OTP Input */
-        .otp-container {
-            display: flex;
-            gap: 10px;
-            margin: 1rem 0;
-        }
-        
-        .otp-input {
-            width: 40px;
-            height: 40px;
-            text-align: center;
-            font-size: 1.2rem;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        .otp-input:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
-        
-        /* Countdown timer */
-        .countdown {
-            text-align: center;
-            margin: 1rem 0;
-            color: var(--primary-dark);
-            font-weight: bold;
+        .rating label:hover ~ label {
+            color: #FF9800;
         }
     </style>
 </head>
@@ -622,14 +524,13 @@
                 <ul>
                     <li><a href="#home">Home</a></li>
                     <li><a href="#massagers">Massagers</a></li>
-                    <li><a href="#bookings">My Bookings</a></li>
                     <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#about">About</a></li>
                 </ul>
             </nav>
             <div class="auth-buttons">
                 <button class="btn btn-outline" id="login-btn">Login</button>
                 <button class="btn btn-primary" id="register-btn">Register</button>
-                <button class="btn btn-outline" id="logout-btn" style="display: none;">Logout</button>
             </div>
         </div>
     </header>
@@ -650,13 +551,6 @@
             </div>
             <div class="pagination" id="pagination">
                 <!-- Pagination will be dynamically inserted here -->
-            </div>
-        </section>
-
-        <section class="container" id="bookings" style="display: none;">
-            <h2 class="section-title">My Bookings</h2>
-            <div class="booking-history" id="bookings-container">
-                <!-- Booking history will be dynamically inserted here -->
             </div>
         </section>
 
@@ -694,12 +588,13 @@
                 <ul>
                     <li><a href="#home">Home</a></li>
                     <li><a href="#massagers">Massagers</a></li>
-                    <li><a href="#bookings">My Bookings</a></li>
                     <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#about">About Us</a></li>
                 </ul>
             </div>
             <div class="footer-section">
                 <h3>Contact Us</h3>
+                <p>Email: info@dimple.com</p>
                 <p>Phone: +251 123 456 789</p>
                 <p>Telegram: <a href="https://t.me/lelaworker" style="color: white;">@lelaworker</a></p>
             </div>
@@ -711,14 +606,11 @@
 
     <button class="app-download" id="install-btn" title="Install App">↓</button>
 
-    <!-- Toast notification -->
-    <div class="toast" id="toast"></div>
-
     <!-- Login Modal -->
     <div class="modal" id="login-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Login with Phone</h2>
+                <h2>Login</h2>
                 <button class="close-modal">&times;</button>
             </div>
             <form id="login-form">
@@ -746,17 +638,16 @@
                 <button class="close-modal">&times;</button>
             </div>
             <div class="role-selection">
-                <div class="role-option selected" data-role="user">
-                    <h3>User</h3>
+                <div class="role-option selected" data-role="client">
+                    <h3>Client</h3>
                     <p>I want to book massages</p>
                 </div>
                 <div class="role-option" data-role="massager">
                     <h3>Massager</h3>
-                    <p>I provide massage services</p>
+                    <p>I want to offer services</p>
                 </div>
             </div>
             <form id="register-form">
-                <input type="hidden" id="register-role" value="user">
                 <div class="form-group">
                     <label for="register-name">Full Name</label>
                     <input type="text" id="register-name" class="form-control" required>
@@ -765,25 +656,26 @@
                     <label for="register-phone">Phone Number</label>
                     <input type="tel" id="register-phone" class="form-control" placeholder="+251XXXXXXXXX" required>
                 </div>
-                <div class="form-group">
-                    <label for="register-telegram">Telegram Username (optional)</label>
-                    <input type="text" id="register-telegram" class="form-control" placeholder="@username">
-                </div>
                 <div id="massager-fields" style="display: none;">
                     <div class="form-group">
-                        <label for="register-specialty">Specialty</label>
-                        <select id="register-specialty" class="form-control">
-                            <option value="Swedish">Swedish Massage</option>
-                            <option value="Deep Tissue">Deep Tissue Massage</option>
-                            <option value="Aromatherapy">Aromatherapy Massage</option>
-                            <option value="Hot Stone">Hot Stone Massage</option>
-                            <option value="Thai">Thai Massage</option>
-                            <option value="Shiatsu">Shiatsu Massage</option>
+                        <label for="register-services">Services Offered</label>
+                        <input type="text" id="register-services" class="form-control" placeholder="Swedish, Deep Tissue, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-gender">Gender</label>
+                        <select id="register-gender" class="form-control">
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="register-hourly-rate">Hourly Rate (ETB)</label>
-                        <input type="number" id="register-hourly-rate" class="form-control" min="500" value="1000">
+                        <label for="register-location">Location</label>
+                        <input type="text" id="register-location" class="form-control" placeholder="Your service location">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-availability">Availability</label>
+                        <input type="text" id="register-availability" class="form-control" placeholder="Mon-Fri 9am-6pm">
                     </div>
                 </div>
                 <div class="form-group">
@@ -798,30 +690,6 @@
             </form>
             <p style="text-align: center; margin-top: 1rem;">
                 Already have an account? <a href="#" id="switch-to-login">Login</a>
-            </p>
-        </div>
-    </div>
-
-    <!-- OTP Verification Modal -->
-    <div class="modal" id="otp-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Verify Phone Number</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <p style="text-align: center; margin-bottom: 1rem;">We've sent a verification code to your phone</p>
-            <div class="otp-container">
-                <input type="text" class="otp-input" maxlength="1" data-index="0">
-                <input type="text" class="otp-input" maxlength="1" data-index="1">
-                <input type="text" class="otp-input" maxlength="1" data-index="2">
-                <input type="text" class="otp-input" maxlength="1" data-index="3">
-                <input type="text" class="otp-input" maxlength="1" data-index="4">
-                <input type="text" class="otp-input" maxlength="1" data-index="5">
-            </div>
-            <div class="countdown" id="countdown">02:00</div>
-            <button id="verify-otp" class="btn btn-primary" style="width: 100%;" disabled>Verify</button>
-            <p style="text-align: center; margin-top: 1rem;">
-                Didn't receive the code? <a href="#" id="resend-otp">Resend</a>
             </p>
         </div>
     </div>
@@ -869,19 +737,15 @@
     <div class="modal" id="payment-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Complete Payment with Telebirr</h2>
+                <h2>Telebirr Payment</h2>
                 <button class="close-modal">&times;</button>
             </div>
             <div id="payment-details">
                 <!-- Payment details will be inserted here -->
             </div>
             <div class="form-group">
-                <label for="telebirr-phone">Telebirr Phone Number</label>
-                <input type="tel" id="telebirr-phone" class="form-control" placeholder="Enter your Telebirr phone number" required>
-            </div>
-            <div class="form-group">
-                <label for="telebirr-pin">Telebirr PIN</label>
-                <input type="password" id="telebirr-pin" class="form-control" placeholder="Enter your Telebirr PIN" required>
+                <label for="telebirr-phone">Your Telebirr Phone Number</label>
+                <input type="tel" id="telebirr-phone" class="form-control" placeholder="+251XXXXXXXXX" required>
             </div>
             <button id="confirm-payment" class="btn btn-primary" style="width: 100%;">Confirm Payment</button>
         </div>
@@ -900,21 +764,21 @@
             <div class="form-group">
                 <label>Your Rating</label>
                 <div class="rating">
-                    <input type="radio" id="star5" name="rating" value="5" />
+                    <input type="radio" id="star5" name="rating" value="5">
                     <label for="star5">★</label>
-                    <input type="radio" id="star4" name="rating" value="4" />
+                    <input type="radio" id="star4" name="rating" value="4">
                     <label for="star4">★</label>
-                    <input type="radio" id="star3" name="rating" value="3" />
+                    <input type="radio" id="star3" name="rating" value="3">
                     <label for="star3">★</label>
-                    <input type="radio" id="star2" name="rating" value="2" />
+                    <input type="radio" id="star2" name="rating" value="2">
                     <label for="star2">★</label>
-                    <input type="radio" id="star1" name="rating" value="1" />
+                    <input type="radio" id="star1" name="rating" value="1">
                     <label for="star1">★</label>
                 </div>
             </div>
             <div class="form-group">
-                <label for="review-comment">Your Review (Optional)</label>
-                <textarea id="review-comment" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
+                <label for="review-text">Your Review (Optional)</label>
+                <textarea id="review-text" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
             </div>
             <button id="submit-rating" class="btn btn-primary" style="width: 100%;">Submit Rating</button>
         </div>
@@ -930,35 +794,36 @@
             <div id="profile-info">
                 <!-- Profile information will be inserted here -->
             </div>
-            <button id="profile-logout-btn" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">Logout</button>
+            <button id="logout-btn" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">Logout</button>
         </div>
     </div>
 
     <script>
-        // API endpoints - Replace with your actual Render URL
-        const API_BASE = 'https://your-render-app.onrender.com/api';
-        const ENDPOINTS = {
-            LOGIN: `${API_BASE}/auth/login`,
-            REGISTER: `${API_BASE}/auth/register`,
-            VERIFY: `${API_BASE}/auth/verify`,
-            MASSAGERS: `${API_BASE}/massagers`,
-            BOOKINGS: `${API_BASE}/bookings`,
-            NOTIFICATIONS: `${API_BASE}/notifications`,
-            RATINGS: `${API_BASE}/ratings`,
-            LOGOUT: `${API_BASE}/auth/logout`
-        };
-
-        // Sample data for massagers (fallback if API is not available)
-        const sampleMassagers = [];
+        // Sample data for massagers
+        const massagers = [];
+        const services = ['Swedish Massage', 'Deep Tissue', 'Aromatherapy', 'Hot Stone', 'Thai Massage', 'Shiatsu', 'Reflexology'];
+        const locations = ['Addis Ababa', 'Dire Dawa', 'Hawassa', 'Bahir Dar', 'Gondar', 'Mekelle', 'Adama'];
+        
         for (let i = 1; i <= 30; i++) {
-            sampleMassagers.push({
-                _id: `massager${i}`,
+            const serviceCount = Math.floor(Math.random() * 3) + 1;
+            const selectedServices = [];
+            for (let j = 0; j < serviceCount; j++) {
+                const randomService = services[Math.floor(Math.random() * services.length)];
+                if (!selectedServices.includes(randomService)) {
+                    selectedServices.push(randomService);
+                }
+            }
+            
+            massagers.push({
+                id: i,
                 name: `Massager ${i}`,
-                specialty: ['Swedish', 'Deep Tissue', 'Aromatherapy', 'Hot Stone', 'Thai', 'Shiatsu'][Math.floor(Math.random() * 6)],
+                specialty: selectedServices.join(', '),
                 rating: (Math.random() * 2 + 3).toFixed(1), // Random rating between 3.0 and 5.0
                 price: Math.floor(Math.random() * 1000) + 500, // Random price between 500 and 1500
                 image: `💆‍${i % 2 ? '♂' : '♀'}️`, // Alternate between male and female emoji
-                reviewCount: Math.floor(Math.random() * 50) + 1
+                gender: i % 2 ? 'Male' : 'Female',
+                location: locations[Math.floor(Math.random() * locations.length)],
+                availability: 'Mon-Sat 9:00 AM - 8:00 PM'
             });
         }
 
@@ -967,42 +832,28 @@
         const itemsPerPage = 10;
         let loggedInUser = null;
         let selectedMassager = null;
-        let selectedBooking = null;
-        let deferredPrompt = null;
-        let otpCountdown = null;
-        let currentOtp = '';
+        let currentBooking = null;
+        let userRole = 'client';
 
         // DOM elements
         const massagersContainer = document.getElementById('massagers-container');
-        const bookingsContainer = document.getElementById('bookings-container');
-        const bookingsSection = document.getElementById('bookings');
         const paginationElement = document.getElementById('pagination');
         const loginModal = document.getElementById('login-modal');
         const registerModal = document.getElementById('register-modal');
-        const otpModal = document.getElementById('otp-modal');
         const bookingModal = document.getElementById('booking-modal');
         const paymentModal = document.getElementById('payment-modal');
         const ratingModal = document.getElementById('rating-modal');
         const profileModal = document.getElementById('profile-modal');
         const loginBtn = document.getElementById('login-btn');
         const registerBtn = document.getElementById('register-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const profileLogoutBtn = document.getElementById('profile-logout-btn');
         const bookNowBtn = document.getElementById('book-now-btn');
         const installBtn = document.getElementById('install-btn');
+        const logoutBtn = document.getElementById('logout-btn');
         const switchToRegister = document.getElementById('switch-to-register');
         const switchToLogin = document.getElementById('switch-to-login');
         const proceedToPaymentBtn = document.getElementById('proceed-to-payment');
         const confirmPaymentBtn = document.getElementById('confirm-payment');
         const submitRatingBtn = document.getElementById('submit-rating');
-        const verifyOtpBtn = document.getElementById('verify-otp');
-        const resendOtpBtn = document.getElementById('resend-otp');
-        const countdownElement = document.getElementById('countdown');
-        const toast = document.getElementById('toast');
-        const roleOptions = document.querySelectorAll('.role-option');
-        const massagerFields = document.getElementById('massager-fields');
-        const registerRole = document.getElementById('register-role');
-        const otpInputs = document.querySelectorAll('.otp-input');
 
         // Initialize the app
         function init() {
@@ -1011,76 +862,51 @@
             setupEventListeners();
             checkAuthStatus();
             generateManifest();
-            registerServiceWorker();
         }
 
         // Render massagers for current page
-        async function renderMassagers() {
-            massagersContainer.innerHTML = '<div class="spinner"></div>';
-            
-            try {
-                // Try to fetch from API first
-                const response = await fetch(`${ENDPOINTS.MASSAGERS}?page=${currentPage}&limit=${itemsPerPage}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    displayMassagers(data.massagers || data.data);
-                    renderPagination(data.totalPages);
-                } else {
-                    throw new Error('API not available');
-                }
-            } catch (error) {
-                // Fallback to sample data
-                console.log('Using sample data:', error);
-                const startIndex = (currentPage - 1) * itemsPerPage;
-                const endIndex = Math.min(startIndex + itemsPerPage, sampleMassagers.length);
-                const pageMassagers = sampleMassagers.slice(startIndex, endIndex);
-                displayMassagers(pageMassagers);
-                renderPagination(Math.ceil(sampleMassagers.length / itemsPerPage));
-            }
-        }
-
-        // Display massagers in the grid
-        function displayMassagers(massagers) {
+        function renderMassagers() {
             massagersContainer.innerHTML = '';
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, massagers.length);
             
-            if (!massagers || massagers.length === 0) {
-                massagersContainer.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">No massagers available at the moment.</p>';
-                return;
-            }
-            
-            massagers.forEach(massager => {
+            for (let i = startIndex; i < endIndex; i++) {
+                const massager = massagers[i];
                 const card = document.createElement('div');
                 card.className = 'massager-card';
                 card.innerHTML = `
-                    <div class="massager-image">${massager.image || '💆'}</div>
+                    <div class="massager-image">${massager.image}</div>
                     <div class="massager-info">
                         <h3 class="massager-name">${massager.name}</h3>
                         <div class="massager-specialty">Specialty: ${massager.specialty}</div>
-                        <div class="massager-rating">Rating: ${massager.rating} ⭐ (${massager.reviewCount || Math.floor(Math.random() * 50) + 1} reviews)</div>
+                        <div class="massager-rating">Rating: ${massager.rating} ⭐ (${Math.floor(Math.random() * 100) + 10} reviews)</div>
+                        <div class="massager-location">Location: ${massager.location}</div>
+                        <div class="massager-availability">Available: ${massager.availability}</div>
                         <div class="massager-price">Price: ${massager.price} ETB/hr</div>
                     </div>
                     <div class="card-actions">
-                        <button class="btn btn-outline view-profile-btn" data-id="${massager._id || massager.id}">View Profile</button>
-                        <button class="btn btn-primary book-btn" data-id="${massager._id || massager.id}">Book Now</button>
+                        <button class="btn btn-outline view-profile-btn" data-id="${massager.id}">View Profile</button>
+                        <button class="btn btn-primary book-btn" data-id="${massager.id}">Book Now</button>
                     </div>
                 `;
                 massagersContainer.appendChild(card);
-            });
+            }
             
             // Add event listeners to the buttons
             document.querySelectorAll('.book-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const massagerId = this.getAttribute('data-id');
+                    const massagerId = parseInt(this.getAttribute('data-id'));
                     openBookingModal(massagerId);
                 });
             });
         }
 
         // Render pagination controls
-        function renderPagination(totalPages) {
+        function renderPagination() {
+            const totalPages = Math.ceil(massagers.length / itemsPerPage);
             paginationElement.innerHTML = '';
             
-            if (!totalPages || totalPages <= 1) return;
+            if (totalPages <= 1) return;
             
             // Previous button
             if (currentPage > 1) {
@@ -1089,16 +915,14 @@
                 prevBtn.addEventListener('click', () => {
                     currentPage--;
                     renderMassagers();
+                    renderPagination();
                     window.scrollTo(0, 0);
                 });
                 paginationElement.appendChild(prevBtn);
             }
             
             // Page numbers
-            const startPage = Math.max(1, currentPage - 2);
-            const endPage = Math.min(totalPages, currentPage + 2);
-            
-            for (let i = startPage; i <= endPage; i++) {
+            for (let i = 1; i <= totalPages; i++) {
                 const pageBtn = document.createElement('button');
                 pageBtn.textContent = i;
                 if (i === currentPage) {
@@ -1107,6 +931,7 @@
                 pageBtn.addEventListener('click', () => {
                     currentPage = i;
                     renderMassagers();
+                    renderPagination();
                     window.scrollTo(0, 0);
                 });
                 paginationElement.appendChild(pageBtn);
@@ -1119,118 +944,17 @@
                 nextBtn.addEventListener('click', () => {
                     currentPage++;
                     renderMassagers();
+                    renderPagination();
                     window.scrollTo(0, 0);
                 });
                 paginationElement.appendChild(nextBtn);
             }
         }
 
-        // Load user's bookings
-        async function loadUserBookings() {
-            if (!loggedInUser) return;
-            
-            try {
-                const token = localStorage.getItem('dimple_token');
-                const response = await fetch(ENDPOINTS.BOOKINGS, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    displayBookings(data.data || data.bookings || []);
-                } else {
-                    // Fallback to local storage
-                    const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-                    const userBookings = bookings.filter(b => b.userId === loggedInUser._id || b.userId === loggedInUser.phone);
-                    displayBookings(userBookings);
-                }
-            } catch (error) {
-                console.error('Error loading bookings:', error);
-                // Fallback to local storage
-                const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-                const userBookings = bookings.filter(b => b.userId === loggedInUser._id || b.userId === loggedInUser.phone);
-                displayBookings(userBookings);
-            }
-        }
-
-        // Display user's bookings
-        function displayBookings(bookings) {
-            bookingsContainer.innerHTML = '';
-            
-            if (bookings.length === 0) {
-                bookingsContainer.innerHTML = '<p style="text-align: center;">You have no bookings yet.</p>';
-                return;
-            }
-            
-            bookings.forEach(booking => {
-                const bookingItem = document.createElement('div');
-                bookingItem.className = 'booking-item';
-                
-                const statusClass = `status-${booking.status || 'confirmed'}`;
-                
-                bookingItem.innerHTML = `
-                    <div class="booking-status ${statusClass}">${booking.status || 'confirmed'}</div>
-                    <h3>${booking.massagerName || 'Massager'}</h3>
-                    <p>Date: ${new Date(booking.date).toDateString()}</p>
-                    <p>Time: ${booking.time}</p>
-                    <p>Price: ${booking.price} ETB</p>
-                    ${booking.status === 'completed' ? 
-                        `<p>Rating: ${booking.rating ? `${booking.rating} ⭐` : 'Not rated yet'}</p>` : 
-                        ''
-                    }
-                    <div class="card-actions">
-                        ${booking.status === 'completed' && !booking.rating ? 
-                            `<button class="btn btn-primary rate-btn" data-id="${booking._id || booking.id}">Rate Now</button>` : 
-                            ''
-                        }
-                        ${booking.status === 'confirmed' ? 
-                            `<button class="btn btn-outline cancel-btn" data-id="${booking._id || booking.id}">Cancel Booking</button>` : 
-                            ''
-                        }
-                    </div>
-                `;
-                
-                bookingsContainer.appendChild(bookingItem);
-            });
-            
-            // Add event listeners to the buttons
-            document.querySelectorAll('.rate-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const bookingId = this.getAttribute('data-id');
-                    openRatingModal(bookingId);
-                });
-            });
-            
-            document.querySelectorAll('.cancel-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const bookingId = this.getAttribute('data-id');
-                    cancelBooking(bookingId);
-                });
-            });
-        }
-
         // Open booking modal
-        async function openBookingModal(massagerId) {
-            try {
-                // Try to fetch massager details from API
-                const response = await fetch(`${ENDPOINTS.MASSAGERS}/${massagerId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    selectedMassager = data.data || data;
-                } else {
-                    throw new Error('API not available');
-                }
-            } catch (error) {
-                // Fallback to sample data
-                selectedMassager = sampleMassagers.find(m => m._id === massagerId || m.id === massagerId);
-            }
-            
-            if (!selectedMassager) {
-                showToast('Massager not found', 'error');
-                return;
-            }
+        function openBookingModal(massagerId) {
+            selectedMassager = massagers.find(m => m.id === massagerId);
+            if (!selectedMassager) return;
             
             const bookingDetails = document.getElementById('booking-details');
             bookingDetails.innerHTML = `
@@ -1251,62 +975,11 @@
             bookingModal.style.display = 'flex';
         }
 
-        // Open rating modal
-        async function openRatingModal(bookingId) {
-            try {
-                // Try to fetch booking details from API
-                const token = localStorage.getItem('dimple_token');
-                const response = await fetch(`${ENDPOINTS.BOOKINGS}/${bookingId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    selectedBooking = data.data || data;
-                } else {
-                    throw new Error('API not available');
-                }
-            } catch (error) {
-                // Fallback to local storage
-                const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
-                selectedBooking = bookings.find(b => b._id == bookingId || b.id == bookingId);
-            }
-            
-            if (!selectedBooking) {
-                showToast('Booking not found', 'error');
-                return;
-            }
-            
-            const ratingDetails = document.getElementById('rating-details');
-            ratingDetails.innerHTML = `
-                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                    <div style="font-size: 3rem; margin-right: 15px;">${selectedBooking.massagerImage || '💆'}</div>
-                    <div>
-                        <h3>${selectedBooking.massagerName || 'Massager'}</h3>
-                        <p>Date: ${new Date(selectedBooking.date).toDateString()}</p>
-                        <p>Time: ${selectedBooking.time}</p>
-                    </div>
-                </div>
-            `;
-            
-            // Reset rating stars
-            document.querySelectorAll('.rating input').forEach(input => {
-                input.checked = false;
-            });
-            
-            ratingModal.style.display = 'flex';
-        }
-
         // Setup event listeners
         function setupEventListeners() {
             // Auth buttons
             loginBtn.addEventListener('click', () => loginModal.style.display = 'flex');
             registerBtn.addEventListener('click', () => registerModal.style.display = 'flex');
-            logoutBtn.addEventListener('click', handleLogout);
-            profileLogoutBtn.addEventListener('click', handleLogout);
-            
             bookNowBtn.addEventListener('click', () => {
                 if (loggedInUser) {
                     // If logged in, scroll to massagers section
@@ -1318,62 +991,23 @@
             });
             
             // Role selection
-            roleOptions.forEach(option => {
+            document.querySelectorAll('.role-option').forEach(option => {
                 option.addEventListener('click', function() {
-                    roleOptions.forEach(o => o.classList.remove('selected'));
+                    document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('selected'));
                     this.classList.add('selected');
-                    registerRole.value = this.getAttribute('data-role');
+                    userRole = this.getAttribute('data-role');
                     
-                    if (registerRole.value === 'massager') {
-                        massagerFields.style.display = 'block';
-                    } else {
-                        massagerFields.style.display = 'none';
-                    }
+                    // Show/hide massager-specific fields
+                    const massagerFields = document.getElementById('massager-fields');
+                    massagerFields.style.display = userRole === 'massager' ? 'block' : 'none';
                 });
             });
             
-            // OTP input handling
-            otpInputs.forEach(input => {
-                input.addEventListener('input', (e) => {
-                    const value = e.target.value;
-                    const index = parseInt(e.target.getAttribute('data-index'));
-                    
-                    if (value.length === 1 && index < 5) {
-                        otpInputs[index + 1].focus();
-                    }
-                    
-                    checkOtpComplete();
-                });
-                
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Backspace' && e.target.value === '') {
-                        const index = parseInt(e.target.getAttribute('data-index'));
-                        if (index > 0) {
-                            otpInputs[index - 1].focus();
-                        }
-                    }
-                });
-            });
-            
-            // OTP verification
-            verifyOtpBtn.addEventListener('click', verifyOtp);
-            resendOtpBtn.addEventListener('click', resendOtp);
-            
-            // Close modals when clicking outside
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.style.display = 'none';
-                    }
-                });
-            });
-            
-            // Close modals with close button
+            // Close modals
             document.querySelectorAll('.close-modal').forEach(btn => {
                 btn.addEventListener('click', () => {
                     loginModal.style.display = 'none';
                     registerModal.style.display = 'none';
-                    otpModal.style.display = 'none';
                     bookingModal.style.display = 'none';
                     paymentModal.style.display = 'none';
                     ratingModal.style.display = 'none';
@@ -1399,9 +1033,9 @@
             document.getElementById('register-form').addEventListener('submit', handleRegister);
             
             // Payment and sharing
-            proceedToPaymentBtn.addEventListener('click', handlePayment);
-            confirmPaymentBtn.addEventListener('click', confirmPayment);
-            submitRatingBtn.addEventListener('click', submitRating);
+            proceedToPaymentBtn.addEventListener('click', handleProceedToPayment);
+            confirmPaymentBtn.addEventListener('click', handlePayment);
+            submitRatingBtn.addEventListener('click', handleRating);
             
             document.querySelectorAll('.share-button').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1410,39 +1044,16 @@
                 });
             });
             
-            // Navigation
-            document.querySelector('a[href="#bookings"]').addEventListener('click', (e) => {
-                if (loggedInUser) {
-                    e.preventDefault();
-                    document.getElementById('massagers').style.display = 'none';
-                    bookingsSection.style.display = 'block';
-                    loadUserBookings();
-                }
-            });
-            
-            document.querySelector('a[href="#massagers"]').addEventListener('click', (e) => {
-                e.preventDefault();
-                document.getElementById('massagers').style.display = 'block';
-                bookingsSection.style.display = 'none';
-            });
+            // Logout
+            logoutBtn.addEventListener('click', handleLogout);
             
             // PWA installation
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
-                deferredPrompt = e;
                 installBtn.style.display = 'block';
-                
-                installBtn.addEventListener('click', async () => {
-                    if (!deferredPrompt) return;
-                    
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    
-                    if (outcome === 'accepted') {
-                        installBtn.style.display = 'none';
-                    }
-                    
-                    deferredPrompt = null;
+                installBtn.addEventListener('click', () => {
+                    e.prompt();
+                    installBtn.style.display = 'none';
                 });
             });
         }
@@ -1450,29 +1061,19 @@
         // Check authentication status
         function checkAuthStatus() {
             const userData = localStorage.getItem('dimple_user');
-            const token = localStorage.getItem('dimple_token');
-            
-            if (userData && token) {
-                try {
-                    loggedInUser = JSON.parse(userData);
-                    updateAuthUI();
-                } catch (e) {
-                    console.error('Error parsing user data:', e);
-                    localStorage.removeItem('dimple_user');
-                    localStorage.removeItem('dimple_token');
-                }
+            if (userData) {
+                loggedInUser = JSON.parse(userData);
+                updateAuthUI();
             }
         }
 
         // Update UI based on authentication status
         function updateAuthUI() {
             if (loggedInUser) {
-                loginBtn.style.display = 'none';
-                registerBtn.style.display = 'none';
-                logoutBtn.style.display = 'block';
-                
-                // Update login button to show profile
                 loginBtn.textContent = 'Profile';
+                registerBtn.style.display = 'none';
+                
+                loginBtn.removeEventListener('click', () => loginModal.style.display = 'flex');
                 loginBtn.addEventListener('click', () => {
                     // Show profile instead of login
                     document.getElementById('profile-info').innerHTML = `
@@ -1484,252 +1085,110 @@
                             <label>Phone</label>
                             <div>${loggedInUser.phone}</div>
                         </div>
-                        ${loggedInUser.telegram ? `
-                        <div class="form-group">
-                            <label>Telegram</label>
-                            <div>${loggedInUser.telegram}</div>
-                        </div>
-                        ` : ''}
                         <div class="form-group">
                             <label>Role</label>
-                            <div>${loggedInUser.role || 'user'}</div>
+                            <div>${loggedInUser.role}</div>
                         </div>
+                        ${loggedInUser.role === 'massager' ? `
+                        <div class="form-group">
+                            <label>Services</label>
+                            <div>${loggedInUser.services || 'Not specified'}</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <div>${loggedInUser.location || 'Not specified'}</div>
+                        </div>
+                        ` : ''}
                     `;
                     profileModal.style.display = 'flex';
                 });
             } else {
-                loginBtn.style.display = 'block';
-                registerBtn.style.display = 'block';
-                logoutBtn.style.display = 'none';
-                
                 loginBtn.textContent = 'Login';
+                registerBtn.style.display = 'block';
+                
+                loginBtn.removeEventListener('click', () => profileModal.style.display = 'flex');
                 loginBtn.addEventListener('click', () => loginModal.style.display = 'flex');
             }
         }
 
         // Handle login
-        async function handleLogin(e) {
+        function handleLogin(e) {
             e.preventDefault();
             const phone = document.getElementById('login-phone').value;
             const password = document.getElementById('login-password').value;
             
             // Simple validation
             if (!phone || !password) {
-                showToast('Please enter both phone number and password', 'error');
+                alert('Please enter both phone number and password');
                 return;
             }
             
-            try {
-                // Try to login via API
-                const response = await fetch(ENDPOINTS.LOGIN, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ phone, password })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    loggedInUser = data.data.user;
-                    localStorage.setItem('dimple_user', JSON.stringify(loggedInUser));
-                    localStorage.setItem('dimple_token', data.token);
-                    loginModal.style.display = 'none';
-                    updateAuthUI();
-                    showToast('Login successful!');
-                } else {
-                    const errorData = await response.json();
-                    showToast(errorData.message || 'Login failed', 'error');
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                showToast('Network error. Please try again.', 'error');
+            // Check if user exists in localStorage
+            const users = JSON.parse(localStorage.getItem('dimple_users') || '[]');
+            const user = users.find(u => u.phone === phone && u.password === password);
+            
+            if (user) {
+                loggedInUser = user;
+                localStorage.setItem('dimple_user', JSON.stringify(user));
+                loginModal.style.display = 'none';
+                updateAuthUI();
+                alert('Login successful!');
+            } else {
+                alert('Invalid credentials. Please try again.');
             }
         }
 
         // Handle registration
-        async function handleRegister(e) {
+        function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('register-name').value;
             const phone = document.getElementById('register-phone').value;
-            const telegram = document.getElementById('register-telegram').value;
             const password = document.getElementById('register-password').value;
             const confirmPassword = document.getElementById('register-confirm-password').value;
-            const role = registerRole.value;
             
             // Validation
             if (password !== confirmPassword) {
-                showToast('Passwords do not match', 'error');
+                alert('Passwords do not match');
                 return;
             }
             
-            try {
-                const userData = {
-                    name,
-                    phone,
-                    password,
-                    role
-                };
-                
-                // Add telegram if provided
-                if (telegram) {
-                    userData.telegram = telegram;
-                }
-                
-                // Add massager-specific fields if applicable
-                if (role === 'massager') {
-                    userData.specialty = document.getElementById('register-specialty').value;
-                    userData.hourlyRate = document.getElementById('register-hourly-rate').value;
-                }
-                
-                // Try to register via API
-                const response = await fetch(ENDPOINTS.REGISTER, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(userData)
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    // Show OTP verification modal
-                    registerModal.style.display = 'none';
-                    showOtpModal(phone);
-                    
-                } else {
-                    const errorData = await response.json();
-                    showToast(errorData.message || 'Registration failed', 'error');
-                }
-            } catch (error) {
-                console.error('Registration error:', error);
-                showToast('Network error. Please try again.', 'error');
-            }
-        }
-
-        // Show OTP modal
-        function showOtpModal(phone) {
-            // Generate a random OTP (in production, this would be sent via SMS)
-            currentOtp = Math.floor(100000 + Math.random() * 900000).toString();
-            console.log(`OTP for ${phone}: ${currentOtp}`); // For testing purposes
-            
-            // Start countdown
-            startOtpCountdown();
-            
-            otpModal.style.display = 'flex';
-        }
-
-        // Start OTP countdown
-        function startOtpCountdown() {
-            let timeLeft = 120; // 2 minutes
-            
-            // Clear previous countdown if any
-            if (otpCountdown) {
-                clearInterval(otpCountdown);
+            // Check if user already exists
+            const users = JSON.parse(localStorage.getItem('dimple_users') || '[]');
+            if (users.some(u => u.phone === phone)) {
+                alert('User with this phone number already exists');
+                return;
             }
             
-            otpCountdown = setInterval(() => {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                
-                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(otpCountdown);
-                    verifyOtpBtn.disabled = true;
-                }
-                
-                timeLeft--;
-            }, 1000);
-        }
-
-        // Check if OTP is complete
-        function checkOtpComplete() {
-            let otp = '';
-            otpInputs.forEach(input => {
-                otp += input.value;
-            });
+            // Create new user
+            const newUser = { 
+                name, 
+                phone, 
+                password, 
+                role: userRole 
+            };
             
-            verifyOtpBtn.disabled = otp.length !== 6;
-        }
-
-        // Verify OTP
-        async function verifyOtp() {
-            let enteredOtp = '';
-            otpInputs.forEach(input => {
-                enteredOtp += input.value;
-            });
-            
-            if (enteredOtp === currentOtp) {
-                try {
-                    // Verify OTP with server
-                    const phone = document.getElementById('register-phone').value;
-                    const response = await fetch(ENDPOINTS.VERIFY, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ phone, otp: enteredOtp })
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        loggedInUser = data.data.user;
-                        localStorage.setItem('dimple_user', JSON.stringify(loggedInUser));
-                        localStorage.setItem('dimple_token', data.token);
-                        
-                        otpModal.style.display = 'none';
-                        updateAuthUI();
-                        showToast('Registration successful! You are now logged in.');
-                    } else {
-                        const errorData = await response.json();
-                        showToast(errorData.message || 'Verification failed', 'error');
-                    }
-                } catch (error) {
-                    console.error('Verification error:', error);
-                    showToast('Network error. Please try again.', 'error');
-                }
-            } else {
-                showToast('Invalid verification code', 'error');
+            // Add massager-specific fields if applicable
+            if (userRole === 'massager') {
+                newUser.services = document.getElementById('register-services').value;
+                newUser.gender = document.getElementById('register-gender').value;
+                newUser.location = document.getElementById('register-location').value;
+                newUser.availability = document.getElementById('register-availability').value;
             }
-        }
-
-        // Resend OTP
-        async function resendOtp() {
-            const phone = document.getElementById('register-phone').value;
             
-            try {
-                const response = await fetch(`${ENDPOINTS.VERIFY}/resend`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ phone })
-                });
-                
-                if (response.ok) {
-                    // Generate new OTP
-                    currentOtp = Math.floor(100000 + Math.random() * 900000).toString();
-                    console.log(`New OTP for ${phone}: ${currentOtp}`); // For testing purposes
-                    
-                    // Reset and restart countdown
-                    startOtpCountdown();
-                    showToast('Verification code sent again');
-                } else {
-                    const errorData = await response.json();
-                    showToast(errorData.message || 'Failed to resend code', 'error');
-                }
-            } catch (error) {
-                console.error('Resend error:', error);
-                showToast('Network error. Please try again.', 'error');
-            }
+            users.push(newUser);
+            localStorage.setItem('dimple_users', JSON.stringify(users));
+            localStorage.setItem('dimple_user', JSON.stringify(newUser));
+            
+            loggedInUser = newUser;
+            registerModal.style.display = 'none';
+            updateAuthUI();
+            alert('Registration successful! You are now logged in.');
         }
 
-        // Handle payment
-        async function handlePayment() {
+        // Handle proceed to payment
+        function handleProceedToPayment() {
             if (!loggedInUser) {
-                showToast('Please login to book a massage', 'error');
+                alert('Please login to book a massage');
                 loginModal.style.display = 'flex';
                 return;
             }
@@ -1738,21 +1197,29 @@
             const time = document.getElementById('booking-time').value;
             
             if (!date || !time) {
-                showToast('Please select both date and time', 'error');
+                alert('Please select both date and time');
                 return;
             }
+            
+            // Create booking object
+            currentBooking = {
+                massager: selectedMassager,
+                date,
+                time,
+                user: loggedInUser,
+                total: selectedMassager.price,
+                status: 'pending'
+            };
             
             // Show payment modal
             const paymentDetails = document.getElementById('payment-details');
             paymentDetails.innerHTML = `
-                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                    <div style="font-size: 3rem; margin-right: 15px;">${selectedMassager.image}</div>
-                    <div>
-                        <h3>${selectedMassager.name}</h3>
-                        <p>Date: ${new Date(date).toDateString()}</p>
-                        <p>Time: ${time}</p>
-                        <p><strong>Total: ${selectedMassager.price} ETB</strong></p>
-                    </div>
+                <div style="margin-bottom: 1rem;">
+                    <h3>Booking Summary</h3>
+                    <p>Massager: ${selectedMassager.name}</p>
+                    <p>Date: ${date}</p>
+                    <p>Time: ${time}</p>
+                    <p><strong>Total: ${selectedMassager.price} ETB</strong></p>
                 </div>
             `;
             
@@ -1760,161 +1227,75 @@
             paymentModal.style.display = 'flex';
         }
 
-        // Confirm payment
-        async function confirmPayment() {
-            const phone = document.getElementById('telebirr-phone').value;
-            const pin = document.getElementById('telebirr-pin').value;
+        // Handle payment
+        function handlePayment() {
+            const telebirrPhone = document.getElementById('telebirr-phone').value;
             
-            if (!phone || !pin) {
-                showToast('Please enter your Telebirr phone number and PIN', 'error');
+            if (!telebirrPhone) {
+                alert('Please enter your Telebirr phone number');
                 return;
             }
             
-            try {
-                const date = document.getElementById('booking-date').value;
-                const time = document.getElementById('booking-time').value;
+            // Simulate Telebirr payment process
+            alert(`Processing Telebirr payment from ${telebirrPhone} for ${currentBooking.total} ETB...`);
+            
+            // In a real app, this would integrate with Telebirr API
+            setTimeout(() => {
+                // Update booking status
+                currentBooking.status = 'confirmed';
+                currentBooking.paymentMethod = 'Telebirr';
+                currentBooking.paymentPhone = telebirrPhone;
                 
-                // Create booking
-                const bookingData = {
-                    massagerId: selectedMassager._id || selectedMassager.id,
-                    massagerName: selectedMassager.name,
-                    massagerImage: selectedMassager.image,
-                    date,
-                    time,
-                    price: selectedMassager.price,
-                    userId: loggedInUser._id,
-                    userName: loggedInUser.name,
-                    telebirrPhone: phone,
-                    status: 'confirmed'
-                };
+                // Save booking
+                const bookings = JSON.parse(localStorage.getItem('dimple_bookings') || '[]');
+                bookings.push(currentBooking);
+                localStorage.setItem('dimple_bookings', JSON.stringify(bookings));
                 
-                // Try to save booking via API
-                const token = localStorage.getItem('dimple_token');
-                const response = await fetch(ENDPOINTS.BOOKINGS, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(bookingData)
-                });
+                paymentModal.style.display = 'none';
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    // Send notification to massager via Telegram
-                    await sendMassagerNotification(data.data || data);
-                    
-                    paymentModal.style.display = 'none';
-                    showToast('Payment successful! Your booking is confirmed.');
-                    
-                    // Share to Telegram channel
-                    shareToTelegram(data.data || data);
-                } else {
-                    const errorData = await response.json();
-                    showToast(errorData.message || 'Booking failed', 'error');
-                }
-            } catch (error) {
-                console.error('Booking error:', error);
-                showToast('Network error. Please try again.', 'error');
-            }
+                // Show rating modal
+                const ratingDetails = document.getElementById('rating-details');
+                ratingDetails.innerHTML = `
+                    <div style="margin-bottom: 1rem;">
+                        <h3>Thank you for your booking!</h3>
+                        <p>Your booking with ${selectedMassager.name} has been confirmed.</p>
+                        <p>We hope you enjoy your massage experience.</p>
+                    </div>
+                `;
+                
+                ratingModal.style.display = 'flex';
+            }, 2000);
         }
 
-        // Submit rating
-        async function submitRating() {
+        // Handle rating submission
+        function handleRating() {
             const rating = document.querySelector('input[name="rating"]:checked');
-            const comment = document.getElementById('review-comment').value;
+            const reviewText = document.getElementById('review-text').value;
             
             if (!rating) {
-                showToast('Please select a rating', 'error');
+                alert('Please select a rating');
                 return;
             }
             
-            try {
-                const ratingData = {
-                    bookingId: selectedBooking._id || selectedBooking.id,
-                    massagerId: selectedBooking.massagerId,
-                    userId: loggedInUser._id,
-                    rating: rating.value,
-                    comment
-                };
-                
-                // Try to submit rating via API
-                const token = localStorage.getItem('dimple_token');
-                const response = await fetch(ENDPOINTS.RATINGS, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(ratingData)
-                });
-                
-                if (response.ok) {
-                    ratingModal.style.display = 'none';
-                    showToast('Thank you for your rating!');
-                    
-                    // Reload bookings to show the updated rating
-                    loadUserBookings();
-                } else {
-                    const errorData = await response.json();
-                    showToast(errorData.message || 'Rating submission failed', 'error');
-                }
-            } catch (error) {
-                console.error('Rating error:', error);
-                showToast('Network error. Please try again.', 'error');
-            }
-        }
-
-        // Cancel booking
-        async function cancelBooking(bookingId) {
-            try {
-                // Try to cancel via API
-                const token = localStorage.getItem('dimple_token');
-                const response = await fetch(`${ENDPOINTS.BOOKINGS}/${bookingId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (response.ok) {
-                    showToast('Booking cancelled successfully');
-                    
-                    // Reload bookings
-                    loadUserBookings();
-                } else {
-                    const errorData = await response.json();
-                    showToast(errorData.message || 'Cancellation failed', 'error');
-                }
-            } catch (error) {
-                console.error('Cancel error:', error);
-                showToast('Network error. Please try again.', 'error');
-            }
-        }
-
-        // Send notification to massager via Telegram
-        async function sendMassagerNotification(bookingData) {
-            try {
-                const notificationData = {
-                    massagerId: bookingData.massagerId,
-                    message: `New booking from ${bookingData.userName} on ${new Date(bookingData.date).toDateString()} at ${bookingData.time} for ${bookingData.price} ETB`
-                };
-                
-                // Try to send notification via API
-                const token = localStorage.getItem('dimple_token');
-                await fetch(ENDPOINTS.NOTIFICATIONS, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(notificationData)
-                });
-            } catch (error) {
-                console.error('Notification error:', error);
-                // In a real app, this would send a Telegram message to the massager
-            }
+            // Save rating
+            const ratings = JSON.parse(localStorage.getItem('dimple_ratings') || '[]');
+            ratings.push({
+                massagerId: selectedMassager.id,
+                massagerName: selectedMassager.name,
+                userId: loggedInUser.phone,
+                userName: loggedInUser.name,
+                rating: rating.value,
+                review: reviewText,
+                date: new Date().toISOString()
+            });
+            
+            localStorage.setItem('dimple_ratings', JSON.stringify(ratings));
+            
+            ratingModal.style.display = 'none';
+            alert('Thank you for your feedback!');
+            
+            // Share to Telegram channel (simulated)
+            shareToTelegram();
         }
 
         // Share booking
@@ -1935,47 +1316,19 @@
         }
 
         // Share to Telegram channel
-        async function shareToTelegram(bookingData) {
-            try {
-                const message = `New booking: ${bookingData.userName} booked ${bookingData.massagerName} on ${new Date(bookingData.date).toDateString()} at ${bookingData.time} for ${bookingData.price} ETB`;
-                
-                // Try to send to Telegram via API
-                const token = localStorage.getItem('dimple_token');
-                await fetch(ENDPOINTS.TELEGRAM, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ message })
-                });
-            } catch (error) {
-                console.error('Telegram sharing error:', error);
-            }
+        function shareToTelegram() {
+            // In a real implementation, this would use the Telegram Bot API
+            console.log(`Sharing booking to Telegram channel @lelaworker`);
+            // This would typically be done on the server side for security
         }
 
         // Handle logout
-        async function handleLogout() {
-            try {
-                // Try to logout via API
-                const token = localStorage.getItem('dimple_token');
-                await fetch(ENDPOINTS.LOGOUT, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-            } catch (error) {
-                console.error('Logout error:', error);
-            } finally {
-                // Clear local storage and reset state
-                localStorage.removeItem('dimple_user');
-                localStorage.removeItem('dimple_token');
-                loggedInUser = null;
-                profileModal.style.display = 'none';
-                updateAuthUI();
-                showToast('You have been logged out');
-            }
+        function handleLogout() {
+            loggedInUser = null;
+            localStorage.removeItem('dimple_user');
+            profileModal.style.display = 'none';
+            updateAuthUI();
+            alert('You have been logged out');
         }
 
         // Generate PWA manifest
@@ -2007,54 +1360,15 @@
             document.getElementById('app-manifest').setAttribute('href', manifestURL);
         }
 
-        // Register Service Worker
-        function registerServiceWorker() {
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    // Simple service worker for caching
-                    const swContent = `
-                        self.addEventListener('install', (event) => {
-                            event.waitUntil(
-                                caches.open('dimple-v1').then((cache) => {
-                                    return cache.addAll([
-                                        '/',
-                                        '/styles.css',
-                                        '/app.js'
-                                    ]);
-                                })
-                            );
-                        });
-                        
-                        self.addEventListener('fetch', (event) => {
-                            event.respondWith(
-                                caches.match(event.request).then((response) => {
-                                    return response || fetch(event.request);
-                                })
-                            );
-                        });
-                    `;
-                    
-                    const swBlob = new Blob([swContent], {type: 'application/javascript'});
-                    const swURL = URL.createObjectURL(swBlob);
-                    
-                    navigator.serviceWorker.register(swURL).then(registration => {
-                        console.log('SW registered: ', registration);
-                    }).catch(registrationError => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
                 });
-            }
-        }
-
-        // Show toast notification
-        function showToast(message, type = 'success') {
-            toast.textContent = message;
-            toast.style.backgroundColor = type === 'error' ? '#f44336' : '#4CAF50';
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            });
         }
 
         // Initialize the app

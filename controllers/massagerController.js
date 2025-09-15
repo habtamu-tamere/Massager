@@ -17,7 +17,7 @@ exports.getMassagers = async (req, res, next) => {
     let query = User.find({ role: 'massager', isActive: true });
 
     // Select fields
-    query = query.select('name phone services gender location availability rating');
+    query = query.select('name phone services gender location availability rating hourlyRate');
 
     // Pagination
     query = query.skip(startIndex).limit(limit);
@@ -62,7 +62,7 @@ exports.getMassager = async (req, res, next) => {
       _id: req.params.id,
       role: 'massager',
       isActive: true
-    }).select('name phone services gender location availability rating');
+    }).select('name phone services gender location availability rating hourlyRate');
 
     if (!massager) {
       return res.status(404).json({
@@ -111,7 +111,6 @@ exports.getMassagerAvailability = async (req, res, next) => {
 
     // Parse availability from massager's schedule
     // This is a simplified implementation
-    // In a real app, you'd need to consider the massager's working hours, breaks, etc.
     const availableSlots = [
       '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'
     ];
@@ -154,21 +153,17 @@ exports.searchMassagers = async (req, res, next) => {
       query['rating.average'] = { $gte: parseFloat(minRating) };
     }
 
-    const massagers = await User.find(query)
-      .select('name phone services gender location availability rating');
-
-    // Filter by max price if provided
-    let filteredMassagers = massagers;
     if (maxPrice) {
-      // This would typically involve a separate pricing model
-      // For simplicity, we're just returning all results
-      // In a real app, you'd query based on the massager's hourly rate
+      query.hourlyRate = { $lte: parseFloat(maxPrice) };
     }
+
+    const massagers = await User.find(query)
+      .select('name phone services gender location availability rating hourlyRate');
 
     res.status(200).json({
       success: true,
-      count: filteredMassagers.length,
-      data: filteredMassagers
+      count: massagers.length,
+      data: massagers
     });
   } catch (error) {
     next(error);

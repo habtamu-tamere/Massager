@@ -60,15 +60,6 @@ const bookingSchema = new mongoose.Schema({
   cancellationReason: {
     type: String,
     maxlength: 500
-  },
-  rating: {
-    type: Number,
-    min: 1,
-    max: 5
-  },
-  review: {
-    type: String,
-    maxlength: 500
   }
 }, {
   timestamps: true
